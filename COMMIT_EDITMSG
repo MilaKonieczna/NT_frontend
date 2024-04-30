@@ -1,0 +1,17 @@
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+# Changes to be committed:
+#	new file:   .prettierrc
+#	modified:   package-lock.json
+#	modified:   package.json
+#	deleted:    public/favicon.ico
+#	modified:   src/App.tsx
+#	new file:   src/book-list/BookList.css
+#	new file:   src/book-list/BookList.tsx
+#	new file:   src/book-list/data.ts
+#	new file:   src/login-form/LoginForm.css
+#	new file:   src/login-form/LoginForm.tsx
+#

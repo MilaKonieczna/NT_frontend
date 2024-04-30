@@ -1,0 +1,9 @@
+.Login-form {
+  margin-top: 5%;
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  align-items: center;
+}
