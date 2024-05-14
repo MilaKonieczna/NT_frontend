@@ -1,0 +1,29 @@
+.Book-list {
+  .book-list-container {
+    width: 80%;
+    margin: 0 auto;
+    margin-left: 5%;
+  }
+
+  .book-list-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .book-cover-image {
+    width: 40px;
+    height: auto;
+    border-radius: 8px;
+    margin-right: 16px;
+  }
+
+  .book-list-title {
+    text-align: center;
+    margin-bottom: 24px;
+    font-weight: 500;
+    color: #333;
+  }
+  .expanded-content {
+    margin-left: 80px;
+  }
+}

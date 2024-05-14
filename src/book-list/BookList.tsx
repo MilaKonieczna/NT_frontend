@@ -1,63 +1,66 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Collapse,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Button,
 } from '@mui/material';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import './BookList.css';
 import { Book, booksData } from '../book-list/data';
 
 function BookList() {
-  const [expandedBookId, setExpandedBookId] = useState<number | null>(null);
-
-  const handleBookClick = (bookId: number) => {
-    setExpandedBookId((prevId) => (prevId === bookId ? null : bookId));
-  };
-
   return (
-    <div className="book-list-container">
-      <List dense className="book-list">
+    <div className="book-list-container" style={{ marginTop: '20px' }}>
+      <Grid container spacing={2}>
         {booksData.map((book: Book) => (
-          <React.Fragment key={book.id}>
-            <ListItem
-              className="book-list-item"
-              onClick={() => handleBookClick(book.id)}
+          <Grid item xs={12} sm="auto" md="auto" lg={2.4} key={book.id}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                margin: 'auto',
+                marginLeft: 2,
+                marginRight: 2,
+              }}
             >
-              <ListItemIcon>
-                <img
-                  src={book.cover_image_url}
-                  alt={book.title}
-                  style={{
-                    width: '50px',
-                    height: 'auto',
-                    borderRadius: '8px',
-                    marginRight: '16px',
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary={book.title}
-                secondary={`${book.author} - ${book.genre}`}
+              <CardMedia
+                component="img"
+                height="200"
+                image={book.cover_image_url}
+                alt={book.title}
               />
-              {expandedBookId === book.id ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <Collapse
-              in={expandedBookId === book.id}
-              timeout="auto"
-              unmountOnExit
-            >
-              <ListItemText
-                style={{ marginLeft: '80px' }}
-                primary={`Description: ${book.description}`}
-                secondary={`Publisher: ${book.publisher}`}
-              />
-            </Collapse>
-          </React.Fragment>
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography
+                  gutterBottom
+                  variant="body1"
+                  component="div"
+                  sx={{ lineHeight: '1' }}
+                >
+                  {book.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {book.author}
+                </Typography>
+              </CardContent>
+              <Button
+                sx={{
+                  marginTop: 2,
+                  marginLeft: 2,
+                  marginRight: 2,
+                  marginBottom: 2,
+                  width: 150,
+                  alignSelf: 'center',
+                }}
+                variant="contained"
+              >
+                Loan
+              </Button>
+            </Card>
+          </Grid>
         ))}
-      </List>
+      </Grid>
     </div>
   );
 }

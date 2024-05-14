@@ -4,14 +4,15 @@ import LoginIcon from '@mui/icons-material/Login';
 import { Formik } from 'formik';
 import { useCallback, useMemo } from 'react';
 import * as yup from 'yup';
+import { useNavigate } from 'react-router-dom';
 
 function LoginForm() {
-  const initialValues = { username: '', password: '' };
+  const navigate = useNavigate();
   const onSubmit = useCallback(
     (values: { username: string; password: string }, formik: any) => {
-      console.log(values);
+      navigate('/home/books');
     },
-    []
+    [navigate]
   );
   const validationSchema = useMemo(
     () =>
@@ -31,7 +32,7 @@ function LoginForm() {
       onSubmit={onSubmit}
       validationSchema={validationSchema}
       validateOnChange
-      validationBlur
+      validateOnBlur
     >
       {(formik: any) => (
         <form
@@ -66,7 +67,7 @@ function LoginForm() {
             startIcon={<LoginIcon />}
             type="submit"
             form="signForm"
-            disabled={!(formik.isValid || formik.dirty)}
+            disabled={!(formik.isValid && formik.dirty)}
           >
             Sign in
           </Button>
