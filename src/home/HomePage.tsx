@@ -1,9 +1,14 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import MenuAppBar from '../menu-app-bar/MenuAppBar';
+import MenuAppBar from '../menu/MenuAppBar';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useApi } from '../ApiProvider';
 
 function HomePage() {
+  const apiClient = useApi();
+  apiClient.getBooks().then((response) => {
+    console.log(response);
+  });
   const location = useLocation();
 
   const renderHomeContent = () => {

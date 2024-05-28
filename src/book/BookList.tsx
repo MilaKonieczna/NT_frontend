@@ -7,7 +7,7 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import { Book, booksData } from '../book-list/data';
+import { Book, booksData } from './Data';
 
 function BookList() {
   return (

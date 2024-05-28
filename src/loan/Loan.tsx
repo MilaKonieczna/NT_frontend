@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import './Loan.css';
-import { Book, booksData } from '../book-list/data';
+import { Book, booksData } from '../book/Data';
 
 function LoanList() {
   const [expandedBookId, setExpandedBookId] = useState<number | null>(null);
