@@ -1,12 +1,16 @@
+// src/library-client.ts
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import { LoginRequestDto } from './dto/loginRequest.dto';
-import { LoginResponseDto } from './dto/loginResponse.dto';
+import { LoginRequestDto } from './dto/login/loginRequest.dto';
+import { LoginResponseDto } from './dto/login/loginResponse.dto';
+import { SignupRequestDto } from './dto/register/signupRequest.dto';
+import { SignupResponseDto } from './dto/register/signupResponse.dto';
 
 export type ClientResponse<T> = {
   success: boolean;
   data: T;
   status: number;
 };
+
 export class LibraryClient {
   private client: AxiosInstance;
 
@@ -36,6 +40,30 @@ export class LibraryClient {
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
 
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async signup(
+    data: SignupRequestDto
+  ): Promise<ClientResponse<SignupResponseDto | null>> {
+    try {
+      const response: AxiosResponse<SignupResponseDto> = await this.client.post(
+        '/auth/signup',
+        data
+      );
+
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
       return {
         success: false,
         data: null,

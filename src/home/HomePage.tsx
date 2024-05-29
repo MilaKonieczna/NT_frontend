@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import MenuAppBar from '../menu/MenuAppBar';
+import './HomePage.css';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useApi } from '../ApiProvider';
 

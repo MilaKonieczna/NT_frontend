@@ -1,0 +1,9 @@
+.HomePage {
+  padding-top: 5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  background: linear-gradient(135deg, #654ea3, #eaafc8);
+  align-items: center;
+}
