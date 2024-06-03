@@ -1,4 +1,4 @@
 export interface SignupResponseDto {
-  success: boolean;
-  message: string;
+  success: boolean | undefined;
+  message: string | undefined;
 }

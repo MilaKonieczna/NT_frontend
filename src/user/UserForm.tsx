@@ -1,25 +1,39 @@
+// src/components/SignupForm.tsx
 import { Button, TextField, Typography } from '@mui/material';
-import LoginIcon from '@mui/icons-material/Login';
-import { Formik } from 'formik';
 import { useCallback, useMemo } from 'react';
 import * as yup from 'yup';
+import './UserForm.css';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../ApiProvider';
-import './LoginForm.css';
+import { Formik } from 'formik';
 
-function LoginForm() {
+function UserForm() {
   const apiClient = useApi();
   const navigate = useNavigate();
 
   const onSubmit = useCallback(
-    (values: { username: string; password: string }, formik: any) => {
-      apiClient.login(values).then((response) => {
-        if (response.success) {
-          navigate('/home');
-        } else {
-          formik.setFieldError('username', 'Invalid username or password');
-        }
-      });
+    (
+      values: {
+        username: string;
+        email: string;
+        password: string;
+        repeatPassword: string;
+      },
+      formik: any
+    ) => {
+      apiClient
+        .signup({
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        })
+        .then((response) => {
+          if (response.success) {
+            navigate('/login');
+          } else {
+            formik.setFieldError('username', 'Username already taken');
+          }
+        });
     },
     [apiClient, navigate]
   );
@@ -28,10 +42,20 @@ function LoginForm() {
     () =>
       yup.object().shape({
         username: yup.string().required('Required'),
+        email: yup.string().email('Invalid email').required('Required'),
         password: yup
           .string()
           .required('Required')
-          .min(5, 'Password too short'),
+          .min(6, 'Password too short')
+          .matches(/[0-9]/, 'Password must contain a number')
+          .matches(
+            /[!@#$%^&*(),.?":{}|<>]/,
+            'Password must contain a special character'
+          ),
+        repeatPassword: yup
+          .string()
+          .required('Required')
+          .oneOf([yup.ref('password')], 'Passwords must match'),
       }),
     []
   );
@@ -44,18 +68,23 @@ function LoginForm() {
         <div className="book3">
           <div className="login">
             <Typography
-              variant="h4"
+              variant="h6"
               component="h2"
               align="center"
               color={'#f1f0eb'}
             >
-              Login
+              Add User
             </Typography>
             <Typography variant="body1" align="center" color={'#f1f0eb'}>
-              Don't have an account? <a href="/signup">Sign Up</a>
+              Already have an account? <a href="/login">Login</a>
             </Typography>
             <Formik
-              initialValues={{ username: '', password: '' }}
+              initialValues={{
+                username: '',
+                email: '',
+                password: '',
+                repeatPassword: '',
+              }}
               onSubmit={onSubmit}
               validationSchema={validationSchema}
               validateOnChange
@@ -90,10 +119,37 @@ function LoginForm() {
                           borderBottomColor: '#f1f0eb',
                         },
                       }}
-                      margin="normal"
                       InputProps={{
                         style: { color: '#f1f0eb' },
                       }}
+                      margin="normal"
+                    />
+                    <TextField
+                      id="email"
+                      label="Email"
+                      variant="standard"
+                      name="email"
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      error={formik.touched.email && !!formik.errors.email}
+                      helperText={formik.touched.email && formik.errors.email}
+                      fullWidth
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#f1f0eb',
+                          ':after': {
+                            color: '#f1f0eb',
+                          },
+                        },
+                        '& .MuiInput-underline': { color: '#f1f0eb' },
+                        ':after': {
+                          borderBottomColor: '#f1f0eb',
+                        },
+                      }}
+                      InputProps={{
+                        style: { color: '#f1f0eb' },
+                      }}
+                      margin="normal"
                     />
                     <TextField
                       id="password"
@@ -122,30 +178,59 @@ function LoginForm() {
                           borderBottomColor: '#f1f0eb',
                         },
                       }}
-                      margin="normal"
                       InputProps={{
                         style: { color: '#f1f0eb' },
                       }}
+                      margin="normal"
+                    />
+                    <TextField
+                      id="repeatPassword"
+                      label="Repeat Password"
+                      variant="standard"
+                      type="password"
+                      name="repeatPassword"
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      error={
+                        formik.touched.repeatPassword &&
+                        !!formik.errors.repeatPassword
+                      }
+                      helperText={
+                        formik.touched.repeatPassword &&
+                        formik.errors.repeatPassword
+                      }
+                      fullWidth
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#f1f0eb',
+                          ':after': {
+                            color: '#f1f0eb',
+                          },
+                        },
+                        '& .MuiInput-underline': { color: '#f1f0eb' },
+                        ':after': {
+                          borderBottomColor: '#f1f0eb',
+                        },
+                      }}
+                      InputProps={{
+                        style: { color: '#f1f0eb' },
+                      }}
+                      margin="normal"
                     />
                     <Button
                       variant="contained"
-                      startIcon={<LoginIcon />}
                       type="submit"
                       form="signForm"
                       disabled={!(formik.isValid && formik.dirty)}
                       fullWidth
-                      style={{
-                        backgroundColor: '#ff4500',
-                        color: '#f1f0eb',
-                      }}
                       sx={{
-                        '&:hover': {
-                          backgroundColor: '#ff4500',
+                        '&': {
+                          backgroundColor: '#7678ED',
                         },
                         marginTop: 5,
                       }}
                     >
-                      Sign in
+                      Sign Up
                     </Button>
                   </div>
                 </form>
@@ -163,4 +248,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default UserForm;

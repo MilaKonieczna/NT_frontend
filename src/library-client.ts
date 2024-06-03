@@ -1,9 +1,17 @@
-// src/library-client.ts
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { LoginRequestDto } from './dto/login/loginRequest.dto';
 import { LoginResponseDto } from './dto/login/loginResponse.dto';
 import { SignupRequestDto } from './dto/register/signupRequest.dto';
 import { SignupResponseDto } from './dto/register/signupResponse.dto';
+import { GetBooksPageResponseDto } from './dto/book/getBookPageResponse.dto';
+import { CreateBookRequestDto } from './dto/book/createBookRequest.dto';
+import { CreateBookResponseDto } from './dto/book/createBookResponse.dto';
+import { GetLoansPageResponseDto } from './dto/loan/getLoanPageResponse.dto';
+import { GetReviewsPageResponseDto } from './dto/review/getReviewPageResponse.dto';
+import { CreateLoanRequestDto } from './dto/loan/createLoanRequest.dto';
+import { CreateLoanResponseDto } from './dto/loan/createLoanResponse.dto';
+import { CreateReviewRequestDto } from './dto/review/createReviewRequest.dto';
+import { CreateReviewResponseDto } from './dto/review/createReviewResponse.dto';
 
 export type ClientResponse<T> = {
   success: boolean;
@@ -72,9 +80,14 @@ export class LibraryClient {
     }
   }
 
-  public async getBooks(): Promise<ClientResponse<any | null>> {
+  public async getBooks(
+    page = 0,
+    size = 10
+  ): Promise<ClientResponse<GetBooksPageResponseDto | null>> {
     try {
-      const response = await this.client.get('/books');
+      const response: AxiosResponse<GetBooksPageResponseDto> =
+        await this.client.get(`/books?page=${page}&size=${size}`);
+
       return {
         success: true,
         data: response.data,
@@ -89,4 +102,133 @@ export class LibraryClient {
       };
     }
   }
+
+  public async createBook(
+    book: CreateBookRequestDto
+  ): Promise<ClientResponse<CreateBookResponseDto | null>> {
+    try {
+      const response: AxiosResponse<CreateBookResponseDto> =
+        await this.client.post('/books', book);
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async getLoans(
+    page = 0,
+    size = 10
+  ): Promise<ClientResponse<GetLoansPageResponseDto | null>> {
+    try {
+      const response: AxiosResponse<GetLoansPageResponseDto> =
+        await this.client.get(`/loans?page=${page}&size=${size}`);
+
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async createLoan(
+    loan: CreateLoanRequestDto
+  ): Promise<ClientResponse<CreateLoanResponseDto | null>> {
+    try {
+      const response: AxiosResponse<CreateLoanResponseDto> =
+        await this.client.post('/loans', loan);
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async getReviews(
+    page = 0,
+    size = 10
+  ): Promise<ClientResponse<GetReviewsPageResponseDto | null>> {
+    try {
+      const response: AxiosResponse<GetReviewsPageResponseDto> =
+        await this.client.get(`/reviews?page=${page}&size=${size}`);
+
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async createReview(
+    review: CreateReviewRequestDto
+  ): Promise<ClientResponse<CreateReviewResponseDto | null>> {
+    try {
+      const response: AxiosResponse<CreateReviewResponseDto> =
+        await this.client.post('/reviews', review);
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+  /* public async addReader(
+    reader: AddReaderDto
+  ): Promise<ClientResponse<AddReaderResponseDto | null>> {
+    try {
+      const response: AxiosResponse<AddReaderResponseDto> =
+        await this.client.post('/readers', reader);
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }*/
 }

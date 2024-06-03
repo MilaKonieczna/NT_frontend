@@ -1,5 +1,5 @@
 export interface SignupRequestDto {
-  username: string;
-  email: string;
-  password: string;
+  username: string | undefined;
+  email: string | undefined;
+  password: string | undefined;
 }
