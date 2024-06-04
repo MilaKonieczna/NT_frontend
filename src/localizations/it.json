@@ -16,5 +16,10 @@
   "author": "Autore",
   "publisher": "Editore",
   "publicationYear": "Anno di pubblicazione",
-  "availableCopies": "Copie Disponibili"
+  "availableCopies": "Copie Disponibili",
+  "noBooksAvailable": "No Books Available",
+  "id": "Id",
+  "noLoansFound": "Nessun Pristito Trovato",
+  "return": "Ritorno",
+  "noAccount": "Non hai un conto?"
 }

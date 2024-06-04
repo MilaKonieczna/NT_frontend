@@ -26,6 +26,7 @@ import it from '../italian.png';
 import pl from '../polish.png';
 import { useApi } from '../ApiProvider';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 
 const theme = createTheme({
   components: {
@@ -46,7 +47,7 @@ const MenuAppBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [OpenCreateBook, setCreateBookOpen] = useState(false);
   const [OpenUpdateDetails, setUpdateDetailsOpen] = useState(false);
-
+  const [languageChanged, setLanguageChanged] = useState(false);
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -76,6 +77,10 @@ const MenuAppBar: React.FC = () => {
   const handleCreateBookClose = () => {
     setCreateBookOpen(false);
     handleMenuClose();
+  };
+  const handleLanguageChange = (language: string) => {
+    i18n.changeLanguage(language);
+    setLanguageChanged(true);
   };
 
   const onSubmit = useCallback(
@@ -194,7 +199,7 @@ const MenuAppBar: React.FC = () => {
               size="large"
               color="inherit"
               aria-label="english"
-              onClick={() => console.log('english clicked')}
+              onClick={() => handleLanguageChange('en')}
               sx={{ mr: 2 }}
             >
               <img src={eng} alt="Icon 1" style={{ width: 24, height: 24 }} />
@@ -203,7 +208,7 @@ const MenuAppBar: React.FC = () => {
               size="large"
               color="inherit"
               aria-label="italian"
-              onClick={() => console.log('italian clicked')}
+              onClick={() => handleLanguageChange('it')}
               sx={{ mr: 2 }}
             >
               <img src={it} alt="Icon 2" style={{ width: 24, height: 24 }} />
@@ -212,7 +217,7 @@ const MenuAppBar: React.FC = () => {
               size="large"
               color="inherit"
               aria-label="polish"
-              onClick={() => console.log('polish clicked')}
+              onClick={() => handleLanguageChange('pl')}
               sx={{ mr: 2 }}
             >
               <img src={pl} alt="Icon 3" style={{ width: 24, height: 24 }} />

@@ -19,5 +19,7 @@
   "availableCopies": "Available Copies",
   "noBooksAvailable": "No Books Available",
   "id": "Id",
-  "noLoansFound": "No Loans Found"
+  "noLoansFound": "No Loans Found",
+  "return": "Return",
+  "noAccount": "Don't have an account?"
 }

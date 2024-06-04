@@ -1,4 +1,3 @@
-// Inside the component
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Grid,
@@ -87,19 +86,17 @@ const LoanList: React.FC = () => {
   );
 
   return (
-    <div className="book-list-container" style={{ marginTop: '20px' }}>
-      <Grid container spacing={2}>
+    <div className="loan-list-container" style={{ marginTop: '20px' }}>
+      <Grid container spacing={3}>
         {Array.isArray(loans) && loans.length > 0 ? (
           loans.map((loan) => (
-            <Grid item xs={12} sm="auto" md="auto" lg={2.4} key={loan.id}>
+            <Grid item xs={12} sm={6} md={4} lg={3} key={loan.id}>
               <Card
                 sx={{
+                  width: '250px',
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  margin: 'auto',
-                  marginLeft: 2,
-                  marginRight: 2,
                 }}
               >
                 <CardMedia
@@ -135,14 +132,14 @@ const LoanList: React.FC = () => {
                     marginLeft: 2,
                     marginRight: 2,
                     marginBottom: 2,
-                    width: 250,
+                    width: '80%',
                     alignSelf: 'center',
                     backgroundColor: '#7678ed',
                   }}
                   variant="contained"
                   onClick={() => handleLoan(loan.id)}
                 >
-                  Return
+                  {t('return')}
                 </Button>
               </Card>
             </Grid>
