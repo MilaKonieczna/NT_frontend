@@ -1,1 +1,20 @@
-{ "library": "Biblioteca" }
+{
+  "library": "Biblioteca",
+  "books": "Libri",
+  "loans": "Prestiti",
+  "addBook": "Aggiungi libro",
+  "updateDetails": "Aggiornare i dettagli",
+  "cancel": "Annulla",
+  "create": "Creare",
+  "update": "Aggiornamento",
+  "createABook": "Creare il libro",
+  "genre": "Genere",
+  "summary": "Riepilogo",
+  "cover": "Copertina",
+  "isbn": "Isbn",
+  "title": "Titolo",
+  "author": "Autore",
+  "publisher": "Editore",
+  "publicationYear": "Anno di pubblicazione",
+  "availableCopies": "Copie Disponibili"
+}

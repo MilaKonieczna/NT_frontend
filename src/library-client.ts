@@ -13,10 +13,12 @@ import { CreateLoanResponseDto } from './dto/loan/createLoanResponse.dto';
 import { CreateReviewRequestDto } from './dto/review/createReviewRequest.dto';
 import { CreateReviewResponseDto } from './dto/review/createReviewResponse.dto';
 import { GetUserDto } from './dto/user/getUser.dto';
+import { UpdateDetailRequestDto } from './dto/book/details/patchdetailsrequest.dto';
+import { UpdateDetailResponseDto } from './dto/book/details/patchdetailsresponse.dto';
 
 export type ClientResponse<T> = {
   success: boolean;
-  data: T;
+  data: T | null;
   status: number;
 };
 
@@ -27,6 +29,11 @@ export class LibraryClient {
     this.client = axios.create({
       baseURL: 'http://localhost:8881/api',
     });
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
   }
 
   public async login(
@@ -37,9 +44,13 @@ export class LibraryClient {
         '/auth/login',
         data
       );
-      this.client.defaults.headers.common[
-        'Authorization'
-      ] = `Bearer ${response.data.token}`;
+      const token = response.data.token;
+      if (token) {
+        this.client.defaults.headers.common[
+          'Authorization'
+        ] = `Bearer ${token}`;
+        localStorage.setItem('token', token);
+      }
 
       return {
         success: true,
@@ -147,28 +158,6 @@ export class LibraryClient {
       };
     }
   }
-
-  public async createLoan(
-    loan: CreateLoanRequestDto
-  ): Promise<ClientResponse<CreateLoanResponseDto | null>> {
-    try {
-      const response: AxiosResponse<CreateLoanResponseDto> =
-        await this.client.post('/loans', loan);
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<Error>;
-      return {
-        success: false,
-        data: null,
-        status: axiosError.response?.status || 0,
-      };
-    }
-  }
-
   public async getCurrentUser(): Promise<ClientResponse<GetUserDto | null>> {
     try {
       const response: AxiosResponse<GetUserDto> = await this.client.get(
@@ -188,6 +177,7 @@ export class LibraryClient {
       };
     }
   }
+
   public async getReviews(
     page = 0,
     size = 10
@@ -196,6 +186,28 @@ export class LibraryClient {
       const response: AxiosResponse<GetReviewsPageResponseDto> =
         await this.client.get(`/reviews?page=${page}&size=${size}`);
 
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async patchDetails(
+    details: UpdateDetailRequestDto
+  ): Promise<ClientResponse<UpdateDetailResponseDto | null>> {
+    try {
+      const { id, ...rest } = details;
+      const response: AxiosResponse<UpdateDetailResponseDto> =
+        await this.client.patch(`/books/${id}/details`, rest);
       return {
         success: true,
         data: response.data,
@@ -231,12 +243,14 @@ export class LibraryClient {
       };
     }
   }
-  /* public async addReader(
-    reader: AddReaderDto
-  ): Promise<ClientResponse<AddReaderResponseDto | null>> {
+  public async getAllLoans(
+    page = 0,
+    size = 10
+  ): Promise<ClientResponse<GetLoansPageResponseDto>> {
     try {
-      const response: AxiosResponse<AddReaderResponseDto> =
-        await this.client.post('/readers', reader);
+      const response: AxiosResponse<GetLoansPageResponseDto> =
+        await this.client.get(`/loans?page=${page}&size=${size}`);
+
       return {
         success: true,
         data: response.data,
@@ -250,5 +264,52 @@ export class LibraryClient {
         status: axiosError.response?.status || 0,
       };
     }
-  }*/
+  }
+
+  public async getUserLoans(
+    userId: number,
+    page = 0,
+    size = 10
+  ): Promise<ClientResponse<GetLoansPageResponseDto>> {
+    try {
+      const response: AxiosResponse<GetLoansPageResponseDto> =
+        await this.client.get(
+          `/users/${userId}/loans?page=${page}&size=${size}`
+        );
+
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
+
+  public async createLoan(
+    loan: CreateLoanRequestDto
+  ): Promise<ClientResponse<CreateLoanResponseDto>> {
+    try {
+      const response: AxiosResponse<CreateLoanResponseDto> =
+        await this.client.post('/loans', loan);
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
 }

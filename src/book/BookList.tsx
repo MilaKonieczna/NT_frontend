@@ -11,7 +11,8 @@ import {
 import { useApi } from '../ApiProvider';
 import { GetBookDto } from '../dto/book/getBook.dto';
 import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
-import { GetUserDto } from '../dto/user/getUser.dto'; // Import GetUserDto
+import { GetUserDto } from '../dto/user/getUser.dto';
+import { useTranslation } from 'react-i18next';
 
 const BookList: React.FC = () => {
   const [books, setBooks] = useState<GetBookDto[]>([]);
@@ -19,9 +20,12 @@ const BookList: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<GetUserDto | null>(null);
   const apiClient = useApi();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!apiClient) return;
+
       try {
         const response = await apiClient.getCurrentUser();
         if (response.success && response.data) {
@@ -36,6 +40,8 @@ const BookList: React.FC = () => {
   }, [apiClient]);
 
   useEffect(() => {
+    if (!apiClient) return;
+
     console.log('Fetching books for page:', currentPage);
     apiClient
       .getBooks(currentPage)
@@ -64,7 +70,7 @@ const BookList: React.FC = () => {
 
   const handleLoan = useCallback(
     async (bookId: number | undefined) => {
-      if (!bookId || !currentUser) return;
+      if (!bookId || !currentUser || !apiClient) return;
 
       const loanRequest: CreateLoanRequestDto = {
         userId: currentUser.id,
@@ -144,7 +150,7 @@ const BookList: React.FC = () => {
           ))
         ) : (
           <Typography variant="h6" component="div" sx={{ margin: 'auto' }}>
-            No books available.
+            {t('noBooksAvailable')}
           </Typography>
         )}
       </Grid>

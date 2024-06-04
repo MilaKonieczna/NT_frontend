@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import MenuAppBar from '../menu/MenuAppBar';
 import './HomePage.css';
@@ -7,10 +7,15 @@ import { useApi } from '../ApiProvider';
 
 function HomePage() {
   const apiClient = useApi();
-  apiClient.getBooks().then((response) => {
-    console.log(response);
-  });
   const location = useLocation();
+
+  useEffect(() => {
+    if (apiClient) {
+      apiClient.getBooks().then((response) => {
+        console.log(response);
+      });
+    }
+  }, [apiClient]);
 
   const renderHomeContent = () => {
     if (location.pathname === '/home') {
@@ -42,7 +47,7 @@ function HomePage() {
           </Typography>
           <Typography variant="body2" gutterBottom>
             According to the International Federation of Library Associations
-            and Institutions, there are around 2.8 million libraries worldwide.{' '}
+            and Institutions, there are around 2.8 million libraries worldwide.
           </Typography>
         </>
       );

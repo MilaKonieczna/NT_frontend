@@ -13,6 +13,8 @@ function LoginForm() {
 
   const onSubmit = useCallback(
     (values: { username: string; password: string }, formik: any) => {
+      if (!apiClient) return;
+
       apiClient.login(values).then((response) => {
         if (response.success) {
           navigate('/home/books');

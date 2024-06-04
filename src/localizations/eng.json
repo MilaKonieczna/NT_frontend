@@ -1,1 +1,23 @@
-{ "library": "Library" }
+{
+  "library": "Library",
+  "books": "Books",
+  "loans": "Loans",
+  "addBook": "Add Book",
+  "updateDetails": "Update Details",
+  "cancel": "Cancel",
+  "create": "Create",
+  "update": "Update",
+  "createABook": "Create a Book",
+  "genre": "Genre",
+  "summary": "Summary",
+  "cover": "Cover",
+  "isbn": "Isbn",
+  "title": "Title",
+  "author": "Author",
+  "publisher": "Publisher",
+  "publicationYear": "Publication Year",
+  "availableCopies": "Available Copies",
+  "noBooksAvailable": "No Books Available",
+  "id": "Id",
+  "noLoansFound": "No Loans Found"
+}

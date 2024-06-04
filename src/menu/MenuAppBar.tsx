@@ -39,7 +39,7 @@ const theme = createTheme({
   },
 });
 
-export default function MenuAppBar() {
+const MenuAppBar: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const apiClient = useApi();
@@ -61,20 +61,20 @@ export default function MenuAppBar() {
   };
 
   const handleUpdateDetailsOpen = () => {
-    setUpdateDetailsOpen(false);
+    setUpdateDetailsOpen(true);
   };
 
   const handleUpdateDetailsClose = () => {
-    setUpdateDetailsOpen(true);
+    setUpdateDetailsOpen(false);
     handleMenuClose();
   };
 
   const handleCreateBookOpen = () => {
-    setCreateBookOpen(false);
+    setCreateBookOpen(true);
   };
 
   const handleCreateBookClose = () => {
-    setCreateBookOpen(true);
+    setCreateBookOpen(false);
     handleMenuClose();
   };
 
@@ -90,6 +90,7 @@ export default function MenuAppBar() {
       },
       formik: any
     ) => {
+      if (!apiClient) return;
       apiClient.createBook(values).then((response) => {
         if (response.success) {
           navigate('/home/books');
@@ -97,6 +98,30 @@ export default function MenuAppBar() {
           setCreateBookOpen(false);
         } else {
           formik.setFieldError('isbn', 'Failed to add book');
+        }
+      });
+    },
+    [apiClient, navigate]
+  );
+
+  const onSubmitDetails = useCallback(
+    (
+      values: {
+        id: number;
+        genre: string;
+        summary: string;
+        cover: string;
+      },
+      formik: any
+    ) => {
+      if (!apiClient) return;
+      apiClient.patchDetails(values).then((response) => {
+        if (response.success) {
+          navigate('/home/books');
+          formik.resetForm();
+          setUpdateDetailsOpen(false);
+        } else {
+          formik.setFieldError('id', 'Failed to update details');
         }
       });
     },
@@ -126,9 +151,11 @@ export default function MenuAppBar() {
       }),
     []
   );
+
   const validateDetails = useMemo(
     () =>
       yup.object().shape({
+        id: yup.number().required('Id is required'),
         genre: yup.string(),
         summary: yup.string(),
         cover: yup.string(),
@@ -156,10 +183,10 @@ export default function MenuAppBar() {
             {t('library')}
           </Typography>
           <MenuItem onClick={() => handleMenuItemClick('/home/books')}>
-            Books
+            {t('books')}
           </MenuItem>
           <MenuItem onClick={() => handleMenuItemClick('/home/loans')}>
-            Loans
+            {t('loans')}
           </MenuItem>
           <Box sx={{ flexGrow: 1 }} />
           <Box>
@@ -209,32 +236,47 @@ export default function MenuAppBar() {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleCreateBookOpen}>Add Book</MenuItem>
-          <MenuItem onClick={handleUpdateDetailsOpen}>Update Details</MenuItem>
+          <MenuItem onClick={handleCreateBookOpen}>{t('addBook')}</MenuItem>
+          <MenuItem onClick={handleUpdateDetailsOpen}>
+            {t('updateDetails')}
+          </MenuItem>
         </Menu>
       </AppBar>
       <Dialog open={OpenUpdateDetails} onClose={handleUpdateDetailsClose}>
-        <DialogTitle>Update Details</DialogTitle>
+        <DialogTitle>{t('updateDetails')}</DialogTitle>
         <DialogContent>
           <Formik
             initialValues={{
-              isbn: '',
-              title: '',
-              author: '',
-              publisher: '',
-              publicationYear: 0,
-              availableCopies: 0,
+              id: 0,
+              genre: '',
+              summary: '',
+              cover: '',
             }}
-            onSubmit={onSubmit}
+            onSubmit={onSubmitDetails}
             validationSchema={validateDetails}
             validateOnChange
             validateOnBlur
           >
-            {(formik: any) => (
-              <form id="signForm" onSubmit={formik.handleSubmit} noValidate>
+            {(formik) => (
+              <form id="detailsForm" onSubmit={formik.handleSubmit} noValidate>
+                <TextField
+                  id="id"
+                  label={t('id')}
+                  variant="outlined"
+                  name="id"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.id && !!formik.errors.id}
+                  helperText={formik.touched.id && formik.errors.id}
+                  fullWidth
+                  margin="normal"
+                  InputProps={{
+                    style: { color: '#000' },
+                  }}
+                />
                 <TextField
                   id="genre"
-                  label="Genre"
+                  label={t('genre')}
                   variant="outlined"
                   name="genre"
                   onChange={formik.handleChange}
@@ -249,7 +291,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="summary"
-                  label="Summary"
+                  label={t('summary')}
                   variant="outlined"
                   name="summary"
                   onChange={formik.handleChange}
@@ -264,7 +306,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="cover"
-                  label="Cover"
+                  label={t('cover')}
                   variant="outlined"
                   name="cover"
                   onChange={formik.handleChange}
@@ -277,16 +319,17 @@ export default function MenuAppBar() {
                     style: { color: '#000' },
                   }}
                 />
-
                 <DialogActions>
-                  <Button onClick={handleUpdateDetailsClose}>Cancel</Button>
+                  <Button onClick={handleUpdateDetailsClose}>
+                    {t('cancel')}
+                  </Button>
                   <Button
                     type="submit"
                     disabled={formik.isSubmitting || !formik.isValid}
                     variant="contained"
                     color="primary"
                   >
-                    Update
+                    {t('update')}
                   </Button>
                 </DialogActions>
               </form>
@@ -295,7 +338,7 @@ export default function MenuAppBar() {
         </DialogContent>
       </Dialog>
       <Dialog open={OpenCreateBook} onClose={handleCreateBookClose}>
-        <DialogTitle>Create a Book</DialogTitle>
+        <DialogTitle>{t('createABook')}</DialogTitle>
         <DialogContent>
           <Formik
             initialValues={{
@@ -311,11 +354,11 @@ export default function MenuAppBar() {
             validateOnChange
             validateOnBlur
           >
-            {(formik: any) => (
-              <form id="signForm" onSubmit={formik.handleSubmit} noValidate>
+            {(formik) => (
+              <form id="bookForm" onSubmit={formik.handleSubmit} noValidate>
                 <TextField
                   id="isbn"
-                  label="ISBN"
+                  label={t('isbn')}
                   variant="outlined"
                   name="isbn"
                   onChange={formik.handleChange}
@@ -330,7 +373,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="title"
-                  label="Title"
+                  label={t('title')}
                   variant="outlined"
                   name="title"
                   onChange={formik.handleChange}
@@ -345,7 +388,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="author"
-                  label="Author"
+                  label={t('author')}
                   variant="outlined"
                   name="author"
                   onChange={formik.handleChange}
@@ -360,7 +403,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="publisher"
-                  label="Publisher"
+                  label={t('publisher')}
                   variant="outlined"
                   name="publisher"
                   onChange={formik.handleChange}
@@ -377,7 +420,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="publicationYear"
-                  label="Publication Year"
+                  label={t('publicationYear')}
                   variant="outlined"
                   name="publicationYear"
                   type="number"
@@ -399,7 +442,7 @@ export default function MenuAppBar() {
                 />
                 <TextField
                   id="availableCopies"
-                  label="Available Copies"
+                  label={t('availableCopies')}
                   variant="outlined"
                   name="availableCopies"
                   type="number"
@@ -420,14 +463,14 @@ export default function MenuAppBar() {
                   }}
                 />
                 <DialogActions>
-                  <Button onClick={handleCreateBookClose}>Cancel</Button>
+                  <Button onClick={handleCreateBookClose}>{t('cancel')}</Button>
                   <Button
                     type="submit"
                     disabled={formik.isSubmitting || !formik.isValid}
                     variant="contained"
                     color="primary"
                   >
-                    Create
+                    {t('create')}
                   </Button>
                 </DialogActions>
               </form>
@@ -437,4 +480,6 @@ export default function MenuAppBar() {
       </Dialog>
     </ThemeProvider>
   );
-}
+};
+
+export default MenuAppBar;
