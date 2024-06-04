@@ -51,11 +51,9 @@ function HomePage() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Box sx={{ textAlign: 'left' }}>
-        <MenuAppBar />
-      </Box>
-      <Box sx={{ textAlign: 'center', pt: 4 }}>
+    <Box className="home-container">
+      <MenuAppBar />
+      <Box className="main-content">
         {renderHomeContent()}
         {location.pathname !== '/home' && <Outlet />}
       </Box>

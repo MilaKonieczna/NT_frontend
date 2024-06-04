@@ -15,7 +15,7 @@ function LoginForm() {
     (values: { username: string; password: string }, formik: any) => {
       apiClient.login(values).then((response) => {
         if (response.success) {
-          navigate('/home');
+          navigate('/home/books');
         } else {
           formik.setFieldError('username', 'Invalid username or password');
         }
@@ -52,7 +52,7 @@ function LoginForm() {
               Login
             </Typography>
             <Typography variant="body1" align="center" color={'#f1f0eb'}>
-              Don't have an account? <a href="/signup">Sign Up</a>
+              Don't have an account? <a href="/addUser">Sign Up</a>
             </Typography>
             <Formik
               initialValues={{ username: '', password: '' }}

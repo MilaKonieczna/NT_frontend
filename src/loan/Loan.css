@@ -1,29 +1,32 @@
-.Book-list {
-  .book-list-container {
-    width: 80%;
-    margin: 0 auto;
-    margin-left: 5%;
-  }
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
 
-  .book-list-item {
-    display: flex;
-    align-items: center;
-  }
+.book-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
 
-  .book-cover-image {
-    width: 40px;
-    height: auto;
-    border-radius: 8px;
-    margin-right: 16px;
-  }
+.book-list-item {
+  display: flex;
+  align-items: center;
+}
 
-  .book-list-title {
-    text-align: center;
-    margin-bottom: 24px;
-    font-weight: 500;
-    color: #333;
-  }
-  .expanded-content {
-    margin-left: 80px;
-  }
+.book-cover-image {
+  width: 70px;
+  height: auto;
+  border-radius: 8px;
+  margin-right: 16px;
+}
+
+.expanded-content {
+  margin-left: 80px;
 }

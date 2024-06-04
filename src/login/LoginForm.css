@@ -11,6 +11,13 @@ body {
   align-items: center;
   display: flex;
   align-items: flex-end;
+  margin-top: 50px;
+}
+.login a {
+  color: #ffa500;
+}
+.login a:hover {
+  color: #ff4500;
 }
 
 .bar-container {

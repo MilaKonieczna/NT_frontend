@@ -12,6 +12,7 @@ import { CreateLoanRequestDto } from './dto/loan/createLoanRequest.dto';
 import { CreateLoanResponseDto } from './dto/loan/createLoanResponse.dto';
 import { CreateReviewRequestDto } from './dto/review/createReviewRequest.dto';
 import { CreateReviewResponseDto } from './dto/review/createReviewResponse.dto';
+import { GetUserDto } from './dto/user/getUser.dto';
 
 export type ClientResponse<T> = {
   success: boolean;
@@ -168,6 +169,25 @@ export class LibraryClient {
     }
   }
 
+  public async getCurrentUser(): Promise<ClientResponse<GetUserDto | null>> {
+    try {
+      const response: AxiosResponse<GetUserDto> = await this.client.get(
+        '/users/me'
+      );
+      return {
+        success: true,
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError<Error>;
+      return {
+        success: false,
+        data: null,
+        status: axiosError.response?.status || 0,
+      };
+    }
+  }
   public async getReviews(
     page = 0,
     size = 10

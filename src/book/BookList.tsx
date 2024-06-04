@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Grid,
   Card,
@@ -10,12 +10,30 @@ import {
 } from '@mui/material';
 import { useApi } from '../ApiProvider';
 import { GetBookDto } from '../dto/book/getBook.dto';
+import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
+import { GetUserDto } from '../dto/user/getUser.dto'; // Import GetUserDto
 
 const BookList: React.FC = () => {
   const [books, setBooks] = useState<GetBookDto[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<GetUserDto | null>(null);
   const apiClient = useApi();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await apiClient.getCurrentUser();
+        if (response.success && response.data) {
+          setCurrentUser(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      }
+    };
+
+    fetchUser();
+  }, [apiClient]);
 
   useEffect(() => {
     console.log('Fetching books for page:', currentPage);
@@ -43,6 +61,28 @@ const BookList: React.FC = () => {
   ) => {
     setCurrentPage(value - 1);
   };
+
+  const handleLoan = useCallback(
+    async (bookId: number | undefined) => {
+      if (!bookId || !currentUser) return;
+
+      const loanRequest: CreateLoanRequestDto = {
+        userId: currentUser.id,
+        bookId,
+      };
+      try {
+        const response = await apiClient.createLoan(loanRequest);
+        if (response.success) {
+          console.log('Loan created successfully:', response.data);
+        } else {
+          console.error('Failed to create loan:', response.status);
+        }
+      } catch (error) {
+        console.error('Error creating loan:', error);
+      }
+    },
+    [apiClient, currentUser]
+  );
 
   return (
     <div className="book-list-container" style={{ marginTop: '20px' }}>
@@ -87,14 +127,15 @@ const BookList: React.FC = () => {
                 </CardContent>
                 <Button
                   sx={{
-                    marginTop: 2,
                     marginLeft: 2,
                     marginRight: 2,
                     marginBottom: 2,
-                    width: 150,
+                    width: 250,
                     alignSelf: 'center',
+                    backgroundColor: '#7678ed',
                   }}
                   variant="contained"
+                  onClick={() => handleLoan(book.id)}
                 >
                   Loan
                 </Button>
@@ -111,7 +152,6 @@ const BookList: React.FC = () => {
         count={totalPages}
         page={currentPage + 1}
         onChange={handlePageChange}
-        color="primary"
         sx={{ marginTop: 2 }}
       />
     </div>

@@ -10,7 +10,7 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import './Loan.css';
 import { Book, booksData } from '../book/Data';
 
-function LoanList() {
+const LoanList: React.FC = () => {
   const [expandedBookId, setExpandedBookId] = useState<number | null>(null);
 
   const handleBookClick = (bookId: number) => {
@@ -30,12 +30,7 @@ function LoanList() {
                 <img
                   src={book.cover_image_url}
                   alt={book.title}
-                  style={{
-                    width: '50px',
-                    height: 'auto',
-                    borderRadius: '8px',
-                    marginRight: '16px',
-                  }}
+                  className="book-cover-image"
                 />
               </ListItemIcon>
               <ListItemText
@@ -50,7 +45,7 @@ function LoanList() {
               unmountOnExit
             >
               <ListItemText
-                style={{ marginLeft: '80px' }}
+                className="expanded-content"
                 primary={`Description: ${book.description}`}
                 secondary={`Publisher: ${book.publisher}`}
               />
@@ -60,6 +55,6 @@ function LoanList() {
       </List>
     </div>
   );
-}
+};
 
 export default LoanList;
