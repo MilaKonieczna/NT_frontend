@@ -73,7 +73,7 @@ export class LibraryClient {
   ): Promise<ClientResponse<SignupResponseDto | null>> {
     try {
       const response: AxiosResponse<SignupResponseDto> = await this.client.post(
-        '/auth/signup',
+        '/auth/register',
         data
       );
 
@@ -84,6 +84,7 @@ export class LibraryClient {
       };
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
+
       return {
         success: false,
         data: null,

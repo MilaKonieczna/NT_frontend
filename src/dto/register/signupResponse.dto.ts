@@ -1,4 +1,7 @@
+import { UserRole } from '../../commonTypes/UserRole';
+
 export interface SignupResponseDto {
-  success: boolean | undefined;
-  message: string | undefined;
+  id: number | undefined;
+  username: string | undefined;
+  role: UserRole | undefined;
 }

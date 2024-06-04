@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 import { useApi } from '../ApiProvider';
 import { GetBookDto } from '../dto/book/getBook.dto';
-import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
 import { GetUserDto } from '../dto/user/getUser.dto';
 import { useTranslation } from 'react-i18next';
+import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
 
 const BookList: React.FC = () => {
   const [books, setBooks] = useState<GetBookDto[]>([]);
@@ -72,12 +72,15 @@ const BookList: React.FC = () => {
     async (bookId: number | undefined) => {
       if (!bookId || !currentUser || !apiClient) return;
 
-      const loanRequest: CreateLoanRequestDto = {
+      const loan: CreateLoanRequestDto = {
         userId: currentUser.id,
         bookId,
+        loanDate: new Date(),
+        dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
       };
+
       try {
-        const response = await apiClient.createLoan(loanRequest);
+        const response = await apiClient.createLoan(loan);
         if (response.success) {
           console.log('Loan created successfully:', response.data);
         } else {

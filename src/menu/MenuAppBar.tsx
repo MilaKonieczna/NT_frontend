@@ -47,6 +47,7 @@ const MenuAppBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [OpenCreateBook, setCreateBookOpen] = useState(false);
   const [OpenUpdateDetails, setUpdateDetailsOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [languageChanged, setLanguageChanged] = useState(false);
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

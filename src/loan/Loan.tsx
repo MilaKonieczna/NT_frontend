@@ -63,28 +63,6 @@ const LoanList: React.FC = () => {
     setCurrentPage(value - 1);
   };
 
-  const handleLoan = useCallback(
-    async (bookId: number | undefined) => {
-      if (!bookId || !currentUser || !apiClient) return;
-
-      const loanRequest: CreateLoanRequestDto = {
-        userId: currentUser.id,
-        bookId,
-      };
-      try {
-        const response = await apiClient.createLoan(loanRequest);
-        if (response.success) {
-          console.log('Loan created successfully:', response.data);
-        } else {
-          console.error('Failed to create loan:', response.status);
-        }
-      } catch (error) {
-        console.error('Error creating loan:', error);
-      }
-    },
-    [apiClient, currentUser]
-  );
-
   return (
     <div className="loan-list-container" style={{ marginTop: '20px' }}>
       <Grid container spacing={3}>
@@ -137,7 +115,6 @@ const LoanList: React.FC = () => {
                     backgroundColor: '#7678ed',
                   }}
                   variant="contained"
-                  onClick={() => handleLoan(loan.id)}
                 >
                   {t('return')}
                 </Button>
