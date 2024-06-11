@@ -1,26 +1,45 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import MenuAppBar from '../menu/MenuAppBar';
-import './HomePage.css';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useApi } from '../ApiProvider';
+import MenuAppBar from '../menu/MenuAppBar';
+import './HomePage.css';
+import { CurrentUser } from '../dto/me/currentUser.dto';
 
-function HomePage() {
-  const apiClient = useApi();
+const HomePage: React.FC = () => {
   const location = useLocation();
+  const [user, setUser] = useState<CurrentUser | null>(null);
+  const apiClient = useApi();
 
   useEffect(() => {
-    if (apiClient) {
-      apiClient.getBooks().then((response) => {
-        console.log(response);
-      });
-    }
+    if (!apiClient) return;
+
+    const fetchCurrentUser = async () => {
+      const response = await apiClient.getMe();
+      if (response.success) {
+        console.log('Current user data:', response.data);
+        setUser(response.data);
+      } else {
+        console.error(
+          'Failed to fetch current user data:',
+          response.statusCode
+        );
+      }
+    };
+
+    fetchCurrentUser();
   }, [apiClient]);
 
+  if (!user) {
+    return <div>Loading...</div>;
+  }
   const renderHomeContent = () => {
     if (location.pathname === '/home') {
       return (
         <>
+          <Typography variant="body1" gutterBottom>
+            Welcome,{user.username}
+          </Typography>
           <Typography variant="body1" gutterBottom>
             Go back to exploring using these buttons:
           </Typography>
@@ -64,6 +83,6 @@ function HomePage() {
       </Box>
     </Box>
   );
-}
+};
 
 export default HomePage;

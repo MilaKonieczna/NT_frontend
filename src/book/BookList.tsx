@@ -13,6 +13,7 @@ import { GetBookDto } from '../dto/book/getBook.dto';
 import { GetUserDto } from '../dto/user/getUser.dto';
 import { useTranslation } from 'react-i18next';
 import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
+import { useNavigate } from 'react-router-dom';
 
 const BookList: React.FC = () => {
   const [books, setBooks] = useState<GetBookDto[]>([]);
@@ -21,13 +22,14 @@ const BookList: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<GetUserDto | null>(null);
   const apiClient = useApi();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!apiClient) return;
 
       try {
-        const response = await apiClient.getCurrentUser();
+        const response = await apiClient.getMe();
         if (response.success && response.data) {
           setCurrentUser(response.data);
         }
@@ -93,6 +95,12 @@ const BookList: React.FC = () => {
     [apiClient, currentUser]
   );
 
+  const handleBookClick = (bookId: number | undefined) => {
+    if (bookId !== undefined) {
+      navigate(`/home/books/${bookId}`);
+    }
+  };
+
   return (
     <div className="book-list-container" style={{ marginTop: '20px' }}>
       <Grid container spacing={2}>
@@ -108,6 +116,7 @@ const BookList: React.FC = () => {
                   marginLeft: 2,
                   marginRight: 2,
                 }}
+                onClick={() => handleBookClick(book.id)}
               >
                 <CardMedia
                   component="img"
@@ -144,7 +153,10 @@ const BookList: React.FC = () => {
                     backgroundColor: '#7678ed',
                   }}
                   variant="contained"
-                  onClick={() => handleLoan(book.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLoan(book.id);
+                  }}
                 >
                   Loan
                 </Button>

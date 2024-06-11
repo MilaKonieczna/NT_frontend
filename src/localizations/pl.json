@@ -15,11 +15,13 @@
   "title": "Tytuł",
   "author": "Autor",
   "publisher": "Wydawca",
+  "login": "Zaloguj",
   "publicationYear": "Rok Wydania",
   "availableCopies": "Dostępne Kopie",
   "noBooksAvailable": "Nie znaleziono książek",
   "id": "Id",
   "noLoansFound": "Nie znaleziono wypożyczeń",
   "return": "Zwróć",
-  "noAccount": "Nie masz konta?"
+  "noAccount": "Nie masz konta?",
+  "signIn": "Zaloguj"
 }

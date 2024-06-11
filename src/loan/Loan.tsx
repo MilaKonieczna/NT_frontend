@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Grid,
   Card,
@@ -9,7 +9,6 @@ import {
   Pagination,
 } from '@mui/material';
 import { useApi } from '../ApiProvider';
-import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
 import { GetUserDto } from '../dto/user/getUser.dto';
 import { useTranslation } from 'react-i18next';
 import { GetLoanDto } from '../dto/loan/getLoan.dto';
@@ -18,7 +17,7 @@ const LoanList: React.FC = () => {
   const [loans, setLoans] = useState<GetLoanDto[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [currentUser, setCurrentUser] = useState<GetUserDto | null>(null);
+  const [, setCurrentUser] = useState<GetUserDto | null>(null);
   const apiClient = useApi();
   const { t } = useTranslation();
 
@@ -27,7 +26,7 @@ const LoanList: React.FC = () => {
       if (!apiClient) return;
 
       try {
-        const response = await apiClient.getCurrentUser();
+        const response = await apiClient.getMe();
         if (response.success && response.data) {
           setCurrentUser(response.data);
         }

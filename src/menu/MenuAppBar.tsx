@@ -33,7 +33,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         colorPrimary: {
-          backgroundColor: '#f18701',
+          backgroundColor: '#A0451A',
         },
       },
     },
@@ -203,7 +203,7 @@ const MenuAppBar: React.FC = () => {
               onClick={() => handleLanguageChange('en')}
               sx={{ mr: 2 }}
             >
-              <img src={eng} alt="Icon 1" style={{ width: 24, height: 24 }} />
+              <img src={eng} alt="Icon 1" style={{ width: 32, height: 24 }} />
             </IconButton>
             <IconButton
               size="large"
@@ -212,7 +212,7 @@ const MenuAppBar: React.FC = () => {
               onClick={() => handleLanguageChange('it')}
               sx={{ mr: 2 }}
             >
-              <img src={it} alt="Icon 2" style={{ width: 24, height: 24 }} />
+              <img src={it} alt="Icon 2" style={{ width: 32, height: 24 }} />
             </IconButton>
             <IconButton
               size="large"
@@ -221,7 +221,7 @@ const MenuAppBar: React.FC = () => {
               onClick={() => handleLanguageChange('pl')}
               sx={{ mr: 2 }}
             >
-              <img src={pl} alt="Icon 3" style={{ width: 24, height: 24 }} />
+              <img src={pl} alt="Icon 3" style={{ width: 32, height: 24 }} />
             </IconButton>
             <IconButton
               size="large"
@@ -326,14 +326,29 @@ const MenuAppBar: React.FC = () => {
                   }}
                 />
                 <DialogActions>
-                  <Button onClick={handleUpdateDetailsClose}>
+                  <Button
+                    onClick={handleUpdateDetailsClose}
+                    sx={{
+                      backgroundColor: '#6e211b',
+                      color: '#f1f0eb',
+                      '&:hover': {
+                        backgroundColor: '#531a15',
+                      },
+                    }}
+                  >
                     {t('cancel')}
                   </Button>
                   <Button
                     type="submit"
                     disabled={formik.isSubmitting || !formik.isValid}
                     variant="contained"
-                    color="primary"
+                    sx={{
+                      backgroundColor: '#6e211b',
+                      color: '#f1f0eb',
+                      '&:hover': {
+                        backgroundColor: '#531a15',
+                      },
+                    }}
                   >
                     {t('update')}
                   </Button>
@@ -469,12 +484,29 @@ const MenuAppBar: React.FC = () => {
                   }}
                 />
                 <DialogActions>
-                  <Button onClick={handleCreateBookClose}>{t('cancel')}</Button>
+                  <Button
+                    onClick={handleUpdateDetailsClose}
+                    sx={{
+                      backgroundColor: '#6e211b',
+                      color: '#f1f0eb',
+                      '&:hover': {
+                        backgroundColor: '#531a15',
+                      },
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
                   <Button
                     type="submit"
                     disabled={formik.isSubmitting || !formik.isValid}
                     variant="contained"
-                    color="primary"
+                    sx={{
+                      backgroundColor: '#6e211b',
+                      color: '#f1f0eb',
+                      '&:hover': {
+                        backgroundColor: '#531a15',
+                      },
+                    }}
                   >
                     {t('create')}
                   </Button>

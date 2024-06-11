@@ -5,6 +5,6 @@ export class GetReviewDto {
   id: number | undefined;
   rating: number | undefined;
   comment: string | undefined;
-  userId: GetUserDto | undefined;
-  bookId: GetBookDto | undefined;
+  userId!: GetUserDto;
+  bookId!: GetBookDto;
 }

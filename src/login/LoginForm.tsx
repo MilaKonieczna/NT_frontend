@@ -53,10 +53,7 @@ function LoginForm() {
               align="center"
               color={'#f1f0eb'}
             >
-              Login
-            </Typography>
-            <Typography variant="body1" align="center" color={'#f1f0eb'}>
-              {t('noAccount')} <a href="/addUser">Sign Up</a>
+              {t('login')}
             </Typography>
             <Formik
               initialValues={{ username: '', password: '' }}
@@ -85,13 +82,21 @@ function LoginForm() {
                       sx={{
                         '& .MuiInputLabel-root': {
                           color: '#f1f0eb',
-                          ':after': {
-                            color: '#f1f0eb',
+                          '&.Mui-focused': {
+                            color: '#5A552F',
                           },
                         },
-                        '& .MuiInput-underline': { color: '#f1f0eb' },
-                        ':after': {
+                        '& .MuiInput-underline:before': {
                           borderBottomColor: '#f1f0eb',
+                        },
+                        '& .MuiInput-underline:after': {
+                          borderBottomColor: '#5A552F',
+                        },
+                        '& .MuiInputBase-input': {
+                          color: '#f1f0eb',
+                        },
+                        '& .MuiInputBase-input:focus': {
+                          color: '#f1f0eb',
                         },
                       }}
                       margin="normal"
@@ -99,6 +104,7 @@ function LoginForm() {
                         style: { color: '#f1f0eb' },
                       }}
                     />
+
                     <TextField
                       id="password"
                       label="Password"
@@ -117,13 +123,21 @@ function LoginForm() {
                       sx={{
                         '& .MuiInputLabel-root': {
                           color: '#f1f0eb',
-                          ':after': {
-                            color: '#f1f0eb',
+                          '&.Mui-focused': {
+                            color: '#5A552F',
                           },
                         },
-                        '& .MuiInput-underline': { color: '#f1f0eb' },
-                        ':after': {
+                        '& .MuiInput-underline:before': {
                           borderBottomColor: '#f1f0eb',
+                        },
+                        '& .MuiInput-underline:after': {
+                          borderBottomColor: '#5A552F',
+                        },
+                        '& .MuiInputBase-input': {
+                          color: '#f1f0eb',
+                        },
+                        '& .MuiInputBase-input:focus': {
+                          color: '#f1f0eb',
                         },
                       }}
                       margin="normal"
@@ -131,6 +145,7 @@ function LoginForm() {
                         style: { color: '#f1f0eb' },
                       }}
                     />
+
                     <Button
                       variant="contained"
                       startIcon={<LoginIcon />}
@@ -139,17 +154,17 @@ function LoginForm() {
                       disabled={!(formik.isValid && formik.dirty)}
                       fullWidth
                       style={{
-                        backgroundColor: '#ff4500',
+                        backgroundColor: '#524D25',
                         color: '#f1f0eb',
                       }}
                       sx={{
                         '&:hover': {
-                          backgroundColor: '#ff4500',
+                          backgroundColor: '#524D25',
                         },
                         marginTop: 5,
                       }}
                     >
-                      Sign in
+                      {t('signIn')}
                     </Button>
                   </div>
                 </form>

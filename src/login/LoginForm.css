@@ -14,10 +14,10 @@ body {
   margin-top: 50px;
 }
 .login a {
-  color: #ffa500;
+  color: #524d25;
 }
 .login a:hover {
-  color: #ff4500;
+  color: #6c5e2d;
 }
 
 .bar-container {
@@ -36,21 +36,24 @@ body {
   width: 70px;
   height: 280px;
   border-radius: 15px;
-  background-color: #ff4500;
+  background-color: #6e211b;
+  border: 6px solid #531a15;
 }
 
 .book2 {
   width: 100px;
   height: 360px;
   border-radius: 15px;
-  background-color: #ffa500;
+  background-color: #bb5610;
+  border: 6px solid #a0451a;
 }
 
 .book3 {
   width: 360px;
   height: 530px;
   border-radius: 15px;
-  background-color: #3d348b;
+  background-color: #aaa45a;
+  border: 6px solid #524d25;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -61,7 +64,8 @@ body {
   width: 200px;
   height: 610px;
   border-radius: 15px;
-  background-color: #ff4500;
+  background-color: #c98116;
+  border: 6px solid #bb5610;
 }
 .login {
   transform: rotate(180deg);
@@ -71,10 +75,9 @@ body {
 }
 
 .plant {
-  background-image: url('.././plant.svg');
+  background-image: url('.././plantv2.svg');
   width: 400px;
   height: 524px;
-  transform: scaleX(-1);
 }
 .text-container {
   display: flex;

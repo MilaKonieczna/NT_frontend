@@ -13,7 +13,7 @@ function UserForm() {
   const onSubmit = useCallback(
     async (values: SignupRequestDto, formik: { resetForm: () => void }) => {
       try {
-        await apiClient?.signup(values);
+        await apiClient?.addUser(values);
         setSuccessMessage('User added successfully.');
         formik.resetForm();
       } catch (error) {

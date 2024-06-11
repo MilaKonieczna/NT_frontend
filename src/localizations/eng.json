@@ -13,6 +13,7 @@
   "cover": "Cover",
   "isbn": "Isbn",
   "title": "Title",
+  "login": "Login",
   "author": "Author",
   "publisher": "Publisher",
   "publicationYear": "Publication Year",
@@ -21,5 +22,6 @@
   "id": "Id",
   "noLoansFound": "No Loans Found",
   "return": "Return",
-  "noAccount": "Don't have an account?"
+  "noAccount": "Don't have an account?",
+  "signIn": "Sign In"
 }

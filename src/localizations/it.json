@@ -19,7 +19,9 @@
   "availableCopies": "Copie Disponibili",
   "noBooksAvailable": "No Books Available",
   "id": "Id",
+  "login": "Login",
   "noLoansFound": "Nessun Pristito Trovato",
   "return": "Ritorno",
-  "noAccount": "Non hai un conto?"
+  "noAccount": "Non hai un conto?",
+  "signIn": "Registrazione"
 }
