@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Grid,
@@ -12,29 +12,53 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   TextField,
 } from '@mui/material';
 import './BookPage.css';
 import { useApi } from '../ApiProvider';
 import { GetReviewDto } from '../dto/review/getReview.dto';
-import { GetBookResponseDto } from '../dto/book/getBookResponse.dto';
+import { GetBookDto } from '../dto/book/getBook.dto';
 import { GetBooksPageResponseDto } from '../dto/book/getBookPageResponse.dto';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
+import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import CircleIcon from '@mui/icons-material/Circle';
 import { useTranslation } from 'react-i18next';
-import { CurrentUser } from '../dto/me/currentUser.dto';
+import { GetUserDto } from '../dto/user/getUser.dto';
+import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
+
+const StarRating: React.FC<{
+  rating: number;
+  onChange?: (rating: number) => void;
+}> = ({ rating, onChange }) => {
+  return (
+    <Box display="flex" alignItems="center">
+      {[...Array(5)].map((_, index) => (
+        <Box
+          key={index}
+          onClick={() => onChange && onChange(index + 1)}
+          sx={{ cursor: onChange ? 'pointer' : 'default' }}
+        >
+          {index < rating ? (
+            <StarOutlinedIcon sx={{ color: '#C98116' }} />
+          ) : (
+            <StarBorderOutlinedIcon sx={{ color: '#C98116' }} />
+          )}
+        </Box>
+      ))}
+    </Box>
+  );
+};
 
 const BookPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
-  const [book, setBook] = useState<GetBookResponseDto | null>(null);
+  const [book, setBook] = useState<GetBookDto | null>(null);
   const [reviews, setReviews] = useState<GetReviewDto[]>([]);
   const [relatedBooks, setRelatedBooks] =
     useState<GetBooksPageResponseDto | null>(null);
   const apiClient = useApi();
   const { t } = useTranslation();
-  const [, setUser] = useState<CurrentUser | null>(null);
+  const [, setUser] = useState<GetUserDto | null>(null);
   const [open, setOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 0, comment: '' });
 
@@ -132,9 +156,31 @@ const BookPage: React.FC = () => {
     }
   }, [apiClient, book]);
 
-  if (!book) return <div>{t('noBookAvailable')}</div>;
+  // const handleLoan = useCallback(
+  //   async (bookId: number | undefined) => {
+  //     if (!bookId || !apiClient) return;
 
-  const availableCopies = book.availableCopies ?? 0;
+  //     const loan: CreateLoanRequestDto = {
+  //       userId: bookId,
+  //       bookId,
+  //       loanDate: new Date(),
+  //       dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+  //     };
+
+  //     try {
+  //       const response = await apiClient.createLoan(loan);
+  //       if (response.success) {
+  //         console.log('Loan created successfully:', response.data);
+  //       } else {
+  //         console.error('Failed to create loan:', response.status);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error creating loan:', error);
+  //     }
+  //   },
+  //   [apiClient]
+  // );
+  if (!book) return <div>{t('noBookAvailable')}</div>;
 
   const averageRating = reviews.length
     ? reviews.reduce((acc, review) => acc + (review.rating ?? 0), 0) /
@@ -147,182 +193,194 @@ const BookPage: React.FC = () => {
       style={{ marginTop: '20px', justifyContent: 'center' }}
     >
       <div className="current-book">
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={4} md={3}>
-            <Card>
-              <CardMedia
-                component="img"
-                image={book.detail?.cover || ''}
-                alt={book.title}
-                sx={{ height: 500 }}
-              />
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={8} md={6} style={{ marginLeft: '20px' }}>
-            <Typography
-              variant="h3"
-              component="div"
-              display="flex"
-              alignItems="center"
-              sx={{ marginBottom: 2 }}
-            >
-              {book.title}
-              <CircleIcon
-                sx={{
-                  color: availableCopies > 0 ? '#AAA45A' : '#87331B',
-                  fontSize: '1rem',
-                  marginLeft: '10px',
-                }}
-              />
-            </Typography>
-
-            <Typography variant="h4" sx={{ marginBottom: 2 }}>
-              {book.author}
-            </Typography>
-            <Typography variant="h5" sx={{ marginBottom: 2 }}>
-              {`${book.detail?.genre} | ${book.publicationYear} | ${book.publisher}`}
-            </Typography>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>
-              {book.detail?.summary}
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{
-                height: '35px',
-                width: '634px',
-                padding: '16px',
-                marginTop: '20px',
-                marginBottom: '20px',
-                backgroundColor: '#D3990F',
-                border: '3px solid',
-                borderColor: '#C98116',
-                '&:hover': {
-                  backgroundColor: '#C98116',
-                  border: '3px solid',
-                  borderColor: '#C26C13',
-                },
-              }}
-            >
-              {t('loan')}
-            </Button>
-            <Divider sx={{ marginY: 2 }} />
-            <Box
-              sx={{
-                width: '600px',
-                maxHeight: '300px',
-                overflowY: 'auto',
-                border: '0px solid #ddd',
-                padding: '16px',
-                marginTop: '20px',
-                backgroundColor: '#f1f0eb',
-                scrollbarColor: '#f1f0eb',
-              }}
-            >
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ marginBottom: 2 }}
-              >
-                <Typography variant="h5">Reviews</Typography>
-                <Box display="flex">
-                  {[...Array(5)].map((_, index) => (
-                    <StarOutlinedIcon
-                      key={index}
-                      sx={{
-                        color:
-                          index < Math.round(averageRating)
-                            ? '#FFD700'
-                            : '#C0C0C0',
-                      }}
-                    />
-                  ))}
-                </Box>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    color: '#F1F0EB',
-                    marginLeft: '16px',
-                    backgroundColor: '#AAA45A',
-                    border: '3px solid',
-                    borderColor: '#7E7940',
-                    '&:hover': {
-                      backgroundColor: '#7E7940',
-                      border: '3px solid',
-                      borderColor: '#524D25',
-                    },
-                  }}
-                  onClick={handleClickOpen}
+        <Box display="flex" flexDirection="row" alignItems="flex-start" gap={2}>
+          <Card>
+            <CardMedia
+              component="img"
+              image={book.detail?.cover || ''}
+              alt={book.title}
+              sx={{ height: 700, maxWidth: 460 }}
+            />
+          </Card>
+          <div className="book-info">
+            <Box flex="1" marginLeft={2}>
+              <div className="top">
+                <Typography
+                  variant="h3"
+                  component="div"
+                  alignItems="center"
+                  sx={{ marginBottom: 2 }}
                 >
-                  {t('addReview')}
-                </Button>
-              </Box>
+                  {book.title}
+                  <CircleIcon
+                    sx={{
+                      color: book.available ? '#AAA45A' : '#87331B',
+                      fontSize: '1rem',
+                      marginLeft: '10px',
+                    }}
+                  />
+                </Typography>
 
-              {reviews &&
-                reviews.map((review) => (
-                  <Card key={review.id} sx={{ marginBottom: 2 }}>
-                    <CardContent>
-                      <Typography variant="body2">
-                        {review.rating ?? 'No rating'}
-                      </Typography>
-                      <Typography variant="body2">{review.comment}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        - {review.userId?.name ?? 'Anonymous'}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
+                <Typography variant="h4" sx={{ marginBottom: 2 }}>
+                  {book.author}
+                </Typography>
+
+                <Typography variant="h5" sx={{ marginBottom: 2 }}>
+                  {`${book.detail?.genre} | ${book.publicationYear} | ${book.publisher}`}
+                </Typography>
+                <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                  {book.detail?.summary}
+                </Typography>
+                <Box
+                  display="flex"
+                  justifyContent="flex-end"
+                  sx={{ marginTop: '20px', marginBottom: '20px' }}
+                >
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      height: '35px',
+                      width: '150px',
+                      color: '#F1F0EB',
+                      backgroundColor: '#AAA45A',
+                      border: '3px solid',
+                      borderColor: '#7E7940',
+                      '&:hover': {
+                        backgroundColor: '#7E7940',
+                        border: '3px solid',
+                        borderColor: '#524D25',
+                      },
+                    }}
+                  >
+                    {t('loan')}
+                  </Button>
+                </Box>
+              </div>
+              <Divider sx={{ marginY: 2 }} />
+              <Box
+                sx={{
+                  width: '100%',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  border: '0px solid #ddd',
+                  backgroundColor: '#f1f0eb',
+                  scrollbarColor: '#f1f0eb',
+                }}
+              >
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ marginBottom: 2 }}
+                >
+                  <Box display="flex" alignItems="center">
+                    <Typography variant="h4" sx={{ marginRight: 2 }}>
+                      {t('reviews')}
+                    </Typography>
+                    <StarRating rating={Math.round(averageRating)} />
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      height: '35px',
+                      width: '150px',
+                      color: '#F1F0EB',
+                      marginLeft: '32px',
+                      backgroundColor: '#AAA45A',
+                      border: '3px solid',
+                      borderColor: '#7E7940',
+                      '&:hover': {
+                        backgroundColor: '#7E7940',
+                        border: '3px solid',
+                        borderColor: '#524D25',
+                      },
+                    }}
+                    onClick={handleClickOpen}
+                  >
+                    {t('addReview')}
+                  </Button>
+                </Box>
+
+                {reviews &&
+                  reviews.map((review) => (
+                    <Card
+                      key={review.id}
+                      sx={{ marginBottom: 2, backgroundColor: '#f1f0eb' }}
+                    >
+                      <CardContent>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          marginBottom={1}
+                        >
+                          <StarRating rating={review.rating ?? 0} />
+                        </Box>
+                        <Typography variant="body2">
+                          {review.comment}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          - {review.userId?.name ?? 'Anonymous'}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </Box>
             </Box>
-          </Grid>
-        </Grid>
+          </div>
+        </Box>
       </div>
 
-      <Divider sx={{ marginY: 2 }} />
-      <Typography variant="h5" sx={{ marginBottom: 2, marginRight: '16px' }}>
-        {t('relatedBooks')}
-      </Typography>
-      <Grid container spacing={1}>
-        {relatedBooks?.books &&
-          relatedBooks.books
-            .filter((relatedBook) => relatedBook.id !== parseInt(bookId || ''))
-            .map((relatedBook) => (
-              <Grid item xs={12} sm={5} md={2.4} key={relatedBook.id}>
-                <Card sx={{ marginBottom: 2, width: 240 }}>
-                  <CardMedia
-                    component="img"
-                    image={relatedBook.detail?.cover || ''}
-                    alt={relatedBook.title}
-                    sx={{ width: 240, height: 350 }}
-                  />
-                  <CardContent>
-                    <Typography variant="body2">{relatedBook.title}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {relatedBook.author}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-      </Grid>
+      {relatedBooks?.books && relatedBooks.books.length > 1 && (
+        <div className="related">
+          <Divider sx={{ marginY: 2, width: 1430 }} />
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ marginBottom: 2, marginRight: '16px' }}
+            >
+              {t('relatedBooks')}
+            </Typography>
+            <Grid container spacing={1}>
+              {relatedBooks.books
+                .filter(
+                  (relatedBook) => relatedBook.id !== parseInt(bookId || '')
+                )
+                .map((relatedBook) => (
+                  <Grid item xs={12} sm={5} md={2.4} key={relatedBook.id}>
+                    <Card sx={{ marginBottom: 2, width: 240 }}>
+                      <CardMedia
+                        component="img"
+                        image={relatedBook.detail?.cover || ''}
+                        alt={relatedBook.title}
+                        className="book-cover"
+                      />
+                      <CardContent>
+                        <Typography variant="body2">
+                          {relatedBook.title}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {relatedBook.author}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+            </Grid>
+          </Box>
+        </div>
+      )}
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{t('addReview')}</DialogTitle>
+        <DialogTitle variant="h6">{t('addReview')}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{t('writeReview')}</DialogContentText>
+          <Box display="flex" alignItems="center" marginBottom={2} width={300}>
+            <StarRating
+              rating={newReview.rating}
+              onChange={(rating) => setNewReview({ ...newReview, rating })}
+            />
+          </Box>
           <TextField
             autoFocus
-            margin="dense"
-            label={t('rating')}
-            type="number"
-            fullWidth
-            variant="standard"
-            value={newReview.rating}
-            onChange={(e) =>
-              setNewReview({ ...newReview, rating: parseInt(e.target.value) })
-            }
-          />
-          <TextField
             margin="dense"
             label={t('comment')}
             type="text"

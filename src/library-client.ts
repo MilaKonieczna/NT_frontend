@@ -14,7 +14,10 @@ import { CreateReviewRequestDto } from './dto/review/createReviewRequest.dto';
 import { UpdateDetailRequestDto } from './dto/book/details/patchdetailsrequest.dto';
 import { UpdateDetailResponseDto } from './dto/book/details/patchdetailsresponse.dto';
 import { CreateReviewResponseDto } from './dto/review/createReviewResponse.dto';
-import { GetBookResponseDto } from './dto/book/getBookResponse.dto';
+import { GetUsersPageResponseDto } from './dto/user/getUserPageResponse.dto';
+import { GetUserDto } from './dto/user/getUser.dto';
+import { GetBookDto } from './dto/book/getBook.dto';
+import { PatchBookResponseDto } from './dto/book/patchBookResponse.dto';
 
 export type ClientResponse<T> = {
   success: boolean;
@@ -36,6 +39,27 @@ export class LibraryClient {
     }
   }
 
+  public async getMe(): Promise<{
+    success: boolean;
+    data: GetUserDto | null;
+    statusCode: number;
+  }> {
+    try {
+      const response = await this.client.get('/users/me');
+      return {
+        success: true,
+        data: response.data,
+        statusCode: response.status,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return {
+        success: false,
+        data: null,
+        statusCode: axiosError.response?.status || 0,
+      };
+    }
+  }
   public async createReview(
     review: CreateReviewRequestDto
   ): Promise<ClientResponse<CreateReviewResponseDto | null>> {
@@ -56,7 +80,7 @@ export class LibraryClient {
       };
     }
   }
-  public async getAllReviews(
+  public async getReviews(
     page = 0,
     size = 10
   ): Promise<ClientResponse<GetReviewsPageResponseDto | null>> {
@@ -99,27 +123,7 @@ export class LibraryClient {
       };
     }
   }
-  public async getReview(
-    id: number
-  ): Promise<ClientResponse<GetReviewsPageResponseDto | null>> {
-    try {
-      const response: AxiosResponse<GetReviewsPageResponseDto> =
-        await this.client.get(`/reviews/${id}`);
 
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<Error>;
-      return {
-        success: false,
-        data: null,
-        status: axiosError.response?.status || 0,
-      };
-    }
-  }
   public async deleteReview(id: number): Promise<ClientResponse<null>> {
     try {
       const response: AxiosResponse<null> = await this.client.delete(
@@ -146,48 +150,6 @@ export class LibraryClient {
     try {
       const response: AxiosResponse<GetLoansPageResponseDto> =
         await this.client.get(`/loans?page=${page}&size=${size}`);
-
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<Error>;
-      return {
-        success: false,
-        data: null,
-        status: axiosError.response?.status || 0,
-      };
-    }
-  }
-  public async getLoan(
-    id: number
-  ): Promise<ClientResponse<GetLoansPageResponseDto | null>> {
-    try {
-      const response: AxiosResponse<GetLoansPageResponseDto> =
-        await this.client.get(`/loans/${id}`);
-
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<Error>;
-      return {
-        success: false,
-        data: null,
-        status: axiosError.response?.status || 0,
-      };
-    }
-  }
-  public async getLoanByUser(
-    id: number
-  ): Promise<ClientResponse<GetLoansPageResponseDto | null>> {
-    try {
-      const response: AxiosResponse<GetLoansPageResponseDto> =
-        await this.client.get(`/loans/user/${id}`);
 
       return {
         success: true,
@@ -265,27 +227,6 @@ export class LibraryClient {
     }
   }
 
-  public async patchLoan(id: number, data: any): Promise<ClientResponse<null>> {
-    try {
-      const response: AxiosResponse<null> = await this.client.patch(
-        `/loans/${id}`,
-        data
-      );
-      return {
-        success: true,
-        data: null,
-        status: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<Error>;
-      return {
-        success: false,
-        data: null,
-        status: axiosError.response?.status || 0,
-      };
-    }
-  }
-
   public async getBooks(
     page = 0,
     size = 10
@@ -330,11 +271,9 @@ export class LibraryClient {
     }
   }
 
-  public async getBook(
-    id: number
-  ): Promise<ClientResponse<GetBookResponseDto | null>> {
+  public async getBook(id: number): Promise<ClientResponse<GetBookDto | null>> {
     try {
-      const response: AxiosResponse<GetBookResponseDto> = await this.client.get(
+      const response: AxiosResponse<GetBookDto> = await this.client.get(
         `/books/${id}`
       );
 
@@ -379,8 +318,22 @@ export class LibraryClient {
   ): Promise<ClientResponse<UpdateDetailResponseDto | null>> {
     try {
       const { id, ...rest } = details;
+
+      // Validate DTO properties
+      if (!id || !rest.genre || !rest.summary || !rest.cover) {
+        throw new Error('Invalid request data: All fields are required');
+      }
+
+      // Log request payload for debugging
+      console.log('PATCH Request Payload:', rest);
+
       const response: AxiosResponse<UpdateDetailResponseDto> =
-        await this.client.patch(`/books/${id}/details`, rest);
+        await this.client.patch(`/books/${id}/details`, rest, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
       return {
         success: true,
         data: response.data,
@@ -388,6 +341,10 @@ export class LibraryClient {
       };
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
+
+      // Log error details for debugging
+      console.error('PATCH Request Error:', axiosError.response?.data);
+
       return {
         success: false,
         data: null,
@@ -399,10 +356,10 @@ export class LibraryClient {
   public async updateCopies(
     id: number,
     copies: number
-  ): Promise<ClientResponse<UpdateDetailResponseDto | null>> {
+  ): Promise<ClientResponse<PatchBookResponseDto | null>> {
     try {
-      const response: AxiosResponse<UpdateDetailResponseDto> =
-        await this.client.patch(`/books/${id}/copies`, { copies });
+      const response: AxiosResponse<PatchBookResponseDto> =
+        await this.client.patch(`/books/${id}/update`, { copies });
       return {
         success: true,
         data: response.data,
@@ -495,46 +452,14 @@ export class LibraryClient {
     }
   }
 
-  public async getMe() {
+  public async getUsers(
+    page = 0,
+    size = 10
+  ): Promise<ClientResponse<GetUsersPageResponseDto | null>> {
     try {
-      const response = await this.client.get('/user/me');
-      return {
-        success: true,
-        data: response.data,
-        statusCode: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      return {
-        success: false,
-        data: null,
-        statusCode: axiosError.response?.status || 0,
-      };
-    }
-  }
-  public async getUsers(): Promise<ClientResponse<any>> {
-    try {
-      const response: AxiosResponse<any> = await this.client.get('/users');
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
-    } catch (error) {
-      const axiosError = error as AxiosError<Error>;
-      return {
-        success: false,
-        data: null,
-        status: axiosError.response?.status || 0,
-      };
-    }
-  }
+      const response: AxiosResponse<GetUsersPageResponseDto> =
+        await this.client.get(`/users?page=${page}&size=${size}`);
 
-  public async getUser(id: number): Promise<ClientResponse<any>> {
-    try {
-      const response: AxiosResponse<any> = await this.client.get(
-        `/users/${id}`
-      );
       return {
         success: true,
         data: response.data,
@@ -563,6 +488,7 @@ export class LibraryClient {
       };
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
+      console.error('Error response:', axiosError.response?.data);
       return {
         success: false,
         data: null,

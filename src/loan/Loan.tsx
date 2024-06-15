@@ -17,7 +17,7 @@ const LoanList: React.FC = () => {
   const [loans, setLoans] = useState<GetLoanDto[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [, setCurrentUser] = useState<GetUserDto | null>(null);
+  const [currentUser, setCurrentUser] = useState<GetUserDto | null>(null);
   const apiClient = useApi();
   const { t } = useTranslation();
 
@@ -41,19 +41,29 @@ const LoanList: React.FC = () => {
   useEffect(() => {
     if (!apiClient) return;
 
-    apiClient
-      .getLoans(currentPage)
-      .then((response) => {
+    const fetchLoans = async () => {
+      try {
+        const response = await apiClient.getLoans(currentPage);
         if (response.success && response.data) {
-          setLoans(response.data.loans);
-          setCurrentPage(response.data.currentPage);
+          const allLoans = response.data.loans;
+
+          const filteredLoans =
+            currentUser?.role === 'ROLE_ADMIN'
+              ? allLoans
+              : allLoans.filter((loan) => loan.userId?.id === currentUser?.id);
+
+          setLoans(filteredLoans);
           setTotalPages(response.data.totalPages);
         } else {
           setLoans([]);
         }
-      })
-      .catch((error) => {});
-  }, [currentPage, apiClient]);
+      } catch (error) {
+        console.error('Failed to fetch loans:', error);
+      }
+    };
+
+    fetchLoans();
+  }, [currentPage, apiClient, currentUser]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -62,66 +72,124 @@ const LoanList: React.FC = () => {
     setCurrentPage(value - 1);
   };
 
+  const handleDeleteLoan = async (loanId: number) => {
+    if (!apiClient) return;
+    try {
+      await apiClient.deleteLoan(loanId);
+      fetchLoans();
+    } catch (error) {
+      console.error('Failed to delete loan:', error);
+    }
+  };
+
+  const handleReturnLoan = async (loanId: number) => {
+    if (!apiClient) return;
+    try {
+      await apiClient.returnLoan(loanId);
+      fetchLoans();
+    } catch (error) {
+      console.error('Failed to return loan:', error);
+    }
+  };
+
+  const fetchLoans = async () => {
+    if (!apiClient) return;
+
+    try {
+      const response = await apiClient.getLoans(currentPage);
+      if (response.success && response.data) {
+        const allLoans = response.data.loans;
+
+        const filteredLoans =
+          currentUser?.role === 'ROLE_ADMIN'
+            ? allLoans
+            : allLoans.filter((loan) => loan.userId?.id === currentUser?.id);
+
+        setLoans(filteredLoans);
+        setTotalPages(response.data.totalPages);
+      } else {
+        setLoans([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch loans:', error);
+    }
+  };
+
   return (
-    <div className="loan-list-container" style={{ marginTop: '20px' }}>
-      <Grid container spacing={3}>
+    <div className="Loan-list">
+      <Grid container spacing={2} justifyContent="center">
         {Array.isArray(loans) && loans.length > 0 ? (
           loans.map((loan) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={loan.id}>
-              <Card
-                sx={{
-                  width: '250px',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
+            <Grid item key={loan.id} xs={12} sm={6} md={4} lg={3}>
+              <Card>
                 <CardMedia
                   component="img"
                   height="200"
                   image={loan.bookId?.detail?.cover}
                   alt={loan.bookId?.title}
+                  className="loan-cover-image"
                 />
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography
-                    gutterBottom
-                    variant="body1"
-                    component="div"
-                    sx={{ lineHeight: '1' }}
-                  >
-                    {loan.id}
+                <CardContent>
+                  <Typography gutterBottom variant="h6" component="div">
+                    {loan.bookId?.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {loan.loanDate?.toString()}
+                  <Typography variant="body1" color="text.secondary">
+                    Loan Date: {loan.loanDate?.toString()}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {loan.dueDate?.toString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {loan.bookId?.id?.toString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {loan.userId?.id?.toString()}
+                  <Typography variant="body1" color="text.secondary">
+                    Due Date: {loan.dueDate?.toString()}
                   </Typography>
                 </CardContent>
-                <Button
-                  sx={{
-                    marginLeft: 2,
-                    marginRight: 2,
-                    marginBottom: 2,
-                    width: '80%',
-                    alignSelf: 'center',
-                    backgroundColor: '#7678ed',
-                  }}
-                  variant="contained"
-                >
-                  {t('return')}
-                </Button>
+                {currentUser?.role === 'ROLE_ADMIN' && (
+                  <div
+                    className="button-container"
+                    style={{ textAlign: 'center' }}
+                  >
+                    <Button
+                      onClick={() => handleReturnLoan(loan.id || 0)}
+                      variant="contained"
+                      sx={{
+                        marginBottom: 2,
+                        width: 100,
+                        alignSelf: 'center',
+                        backgroundColor: '#D3990F',
+                        border: '3px solid',
+                        borderColor: '#C98116',
+                        '&:hover': {
+                          backgroundColor: '#C98116',
+                          border: '3px solid',
+                          borderColor: '#C26C13',
+                        },
+                      }}
+                    >
+                      {t('return')}
+                    </Button>
+                    <br />
+                    <Button
+                      onClick={() => handleDeleteLoan(loan.id || 0)}
+                      variant="contained"
+                      sx={{
+                        marginBottom: 2,
+                        width: 100,
+                        backgroundColor: '#D3990F',
+                        border: '3px solid',
+                        borderColor: '#C98116',
+                        '&:hover': {
+                          backgroundColor: '#C98116',
+                          border: '3px solid',
+                          borderColor: '#C26C13',
+                        },
+                      }}
+                    >
+                      {t('delete')}
+                    </Button>
+                  </div>
+                )}
               </Card>
             </Grid>
           ))
         ) : (
-          <Typography variant="h6" component="div" sx={{ margin: 'auto' }}>
+          <Typography variant="h6" component="div" className="loan-list-title">
             {t('noLoansFound')}
           </Typography>
         )}
@@ -130,7 +198,7 @@ const LoanList: React.FC = () => {
         count={totalPages}
         page={currentPage + 1}
         onChange={handlePageChange}
-        sx={{ marginTop: 2 }}
+        style={{ marginTop: '20px' }}
       />
     </div>
   );

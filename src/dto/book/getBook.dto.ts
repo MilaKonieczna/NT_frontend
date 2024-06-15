@@ -7,6 +7,6 @@ export class GetBookDto {
   author: string | undefined;
   publisher: string | undefined;
   publicationYear: number | undefined;
-  isAvailable: boolean | undefined;
+  available?: boolean;
   detail: DetailDto | undefined;
 }

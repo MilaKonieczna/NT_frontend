@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AppBar,
   Box,
@@ -27,6 +27,7 @@ import pl from '../polish.png';
 import { useApi } from '../ApiProvider';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
+import { GetUserDto } from '../dto/user/getUser.dto';
 
 const theme = createTheme({
   components: {
@@ -34,6 +35,22 @@ const theme = createTheme({
       styleOverrides: {
         colorPrimary: {
           backgroundColor: '#A0451A',
+          border: '4px solid',
+          borderColor: '#87331B',
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#f1f0eb',
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#f1f0eb',
         },
       },
     },
@@ -47,8 +64,31 @@ const MenuAppBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [OpenCreateBook, setCreateBookOpen] = useState(false);
   const [OpenUpdateDetails, setUpdateDetailsOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [languageChanged, setLanguageChanged] = useState(false);
+  const [, setLanguageChanged] = useState(false);
+  const [OpenUpdateCopies, setUpdateCopiesOpen] = useState(false);
+  const [user, setUser] = useState<GetUserDto | null>(null);
+
+  useEffect(() => {
+    if (!apiClient) return;
+
+    const fetchCurrentUser = async () => {
+      const response = await apiClient.getMe();
+      if (response.success) {
+        console.log('Current user data:', response.data);
+        setUser(response.data);
+      } else {
+        console.error(
+          'Failed to fetch current user data:',
+          response.statusCode
+        );
+      }
+    };
+
+    fetchCurrentUser();
+  }, [apiClient]);
+
+  const isAdmin = user?.role === 'ROLE_ADMIN';
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -71,6 +111,14 @@ const MenuAppBar: React.FC = () => {
     handleMenuClose();
   };
 
+  const handleUpdateCopiesOpen = () => {
+    setUpdateCopiesOpen(true);
+  };
+
+  const handleUpdateCopiesClose = () => {
+    setUpdateCopiesOpen(false);
+    handleMenuClose();
+  };
   const handleCreateBookOpen = () => {
     setCreateBookOpen(true);
   };
@@ -79,6 +127,7 @@ const MenuAppBar: React.FC = () => {
     setCreateBookOpen(false);
     handleMenuClose();
   };
+
   const handleLanguageChange = (language: string) => {
     i18n.changeLanguage(language);
     setLanguageChanged(true);
@@ -168,6 +217,22 @@ const MenuAppBar: React.FC = () => {
       }),
     []
   );
+  const handleSubmitCopies = useCallback(
+    (values: { newCopies: number; bookId: number }) => {
+      console.log('Submitting copies:', values);
+      if (!apiClient) return;
+      const { newCopies, bookId } = values;
+      apiClient.updateCopies(bookId, newCopies).then((response) => {
+        if (response.success) {
+          console.log('Copies updated successfully:', response.data);
+          setUpdateCopiesOpen(false);
+        } else {
+          console.error('Failed to update copies:', response.status);
+        }
+      });
+    },
+    [apiClient]
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -185,15 +250,54 @@ const MenuAppBar: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ mr: 4 }}>
+          <Typography variant="h5" component="div" sx={{ mr: 4 }}>
             {t('library')}
           </Typography>
-          <MenuItem onClick={() => handleMenuItemClick('/home/books')}>
+          <MenuItem
+            onClick={() => handleMenuItemClick('/home/books')}
+            sx={{
+              fontSize: '18px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             {t('books')}
           </MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick('/home/loans')}>
+          <MenuItem
+            onClick={() => handleMenuItemClick('/home/loans')}
+            sx={{
+              fontSize: '18px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             {t('loans')}
           </MenuItem>
+          {isAdmin && (
+            <MenuItem
+              onClick={() => handleMenuItemClick('/home/users')}
+              sx={{
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {t('users')}
+            </MenuItem>
+          )}
+          {isAdmin && (
+            <MenuItem
+              onClick={() => handleMenuItemClick('/home/reviews')}
+              sx={{
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {t('reviews')}
+            </MenuItem>
+          )}
+
           <Box sx={{ flexGrow: 1 }} />
           <Box>
             <IconButton
@@ -246,9 +350,18 @@ const MenuAppBar: React.FC = () => {
           <MenuItem onClick={handleUpdateDetailsOpen}>
             {t('updateDetails')}
           </MenuItem>
+          {isAdmin && (
+            <MenuItem onClick={handleUpdateCopiesOpen}>
+              {t('newCopies')}
+            </MenuItem>
+          )}
         </Menu>
       </AppBar>
-      <Dialog open={OpenUpdateDetails} onClose={handleUpdateDetailsClose}>
+      <Dialog
+        open={OpenUpdateDetails}
+        onClose={handleUpdateDetailsClose}
+        sx={{ color: 'f1f0eb' }}
+      >
         <DialogTitle>{t('updateDetails')}</DialogTitle>
         <DialogContent>
           <Formik
@@ -509,6 +622,86 @@ const MenuAppBar: React.FC = () => {
                     }}
                   >
                     {t('create')}
+                  </Button>
+                </DialogActions>
+              </form>
+            )}
+          </Formik>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={OpenUpdateCopies} onClose={handleUpdateCopiesClose}>
+        <DialogTitle>{t('newCopies')}</DialogTitle>
+        <DialogContent>
+          <Formik
+            initialValues={{
+              bookId: 0,
+              newCopies: 0,
+            }}
+            onSubmit={handleSubmitCopies}
+            validateOnChange
+            validateOnBlur
+          >
+            {(formik) => (
+              <form id="UpdateCopies" onSubmit={formik.handleSubmit} noValidate>
+                <TextField
+                  id="bookId"
+                  label={t('bookId')}
+                  variant="outlined"
+                  name="bookId"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.bookId && !!formik.errors.bookId}
+                  helperText={formik.touched.bookId && formik.errors.bookId}
+                  fullWidth
+                  margin="normal"
+                  InputProps={{
+                    style: { color: '#000' },
+                  }}
+                />
+                <TextField
+                  id="newCopies"
+                  label={t('newCopies')}
+                  variant="outlined"
+                  name="newCopies"
+                  type="number"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.newCopies && !!formik.errors.newCopies}
+                  helperText={
+                    formik.touched.newCopies && formik.errors.newCopies
+                  }
+                  fullWidth
+                  margin="normal"
+                  InputProps={{
+                    style: { color: '#000' },
+                  }}
+                />
+                <DialogActions>
+                  <Button
+                    onClick={handleUpdateCopiesClose}
+                    sx={{
+                      backgroundColor: '#6e211b',
+                      color: '#f1f0eb',
+                      '&:hover': {
+                        backgroundColor: '#531a15',
+                      },
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={formik.isSubmitting || !formik.isValid}
+                    variant="contained"
+                    sx={{
+                      backgroundColor: '#6e211b',
+                      color: '#f1f0eb',
+                      '&:hover': {
+                        backgroundColor: '#531a15',
+                      },
+                    }}
+                  >
+                    {t('update')}
                   </Button>
                 </DialogActions>
               </form>

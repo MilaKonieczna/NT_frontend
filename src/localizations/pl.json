@@ -23,5 +23,16 @@
   "noLoansFound": "Nie znaleziono wypożyczeń",
   "return": "Zwróć",
   "noAccount": "Nie masz konta?",
-  "signIn": "Zaloguj"
+  "signIn": "Zaloguj",
+  "reviews": "Opinie",
+  "users": "Użytkownicy",
+  "newCopies": "Zaktualizuj Ilość Egzemplarzy",
+  "loading": "Ładowanie...",
+  "welcome": "Witamy",
+  "explore_buttons": "Wróć do eksploracji, korzystając z tych przycisków:",
+  "my_books": "Moje książki",
+  "all_books": "Wszystkie książki",
+  "fun_fact": "Ciekawostka!",
+  "addReview": "dodaj opinie",
+  "loan": "Wypożycz"
 }

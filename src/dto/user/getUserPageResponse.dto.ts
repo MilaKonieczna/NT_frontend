@@ -1,6 +1,6 @@
 import { GetUserDto } from './getUser.dto';
 
-export interface GetUserPageResponseDto {
+export interface GetUsersPageResponseDto {
   users: GetUserDto[];
   currentPage: number;
   totalItems: number;

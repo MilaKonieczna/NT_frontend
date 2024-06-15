@@ -23,5 +23,18 @@
   "noLoansFound": "No Loans Found",
   "return": "Return",
   "noAccount": "Don't have an account?",
-  "signIn": "Sign In"
+  "signIn": "Sign In",
+  "reviews": "Reviews",
+  "users": "Users",
+  "newCopies": "Update Amount of Copies",
+  "loading": "Loading...",
+  "welcome": "Welcome",
+  "explore_buttons": "Go back to exploring using these buttons:",
+  "my_books": "My Books",
+  "all_books": "All Books",
+  "fun_fact": "Fun Fact!",
+  "addReview": "Add Review",
+  "loan": "Loan",
+  "comment": "Comment",
+  "relatedBooks": "Related Books"
 }

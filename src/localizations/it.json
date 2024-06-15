@@ -23,5 +23,16 @@
   "noLoansFound": "Nessun Pristito Trovato",
   "return": "Ritorno",
   "noAccount": "Non hai un conto?",
-  "signIn": "Registrazione"
+  "signIn": "Registrazione",
+  "reviews": "Recensioni",
+  "users": "Utenti",
+  "newCopies": "Attualizzare il numero di copie",
+  "loading": "Caricamento...",
+  "welcome": "Benvenuto",
+  "explore_buttons": "Torna a esplorare usando questi pulsanti:",
+  "my_books": "I miei libri",
+  "all_books": "Tutti i libri",
+  "fun_fact": "Fatto divertente!",
+  "addReview": "Aggiungi Recensione",
+  "loan": "Prestare"
 }

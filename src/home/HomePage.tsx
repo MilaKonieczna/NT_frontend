@@ -1,72 +1,82 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { useApi } from '../ApiProvider';
+import { useUser } from '../ApiProvider';
 import MenuAppBar from '../menu/MenuAppBar';
 import './HomePage.css';
-import { CurrentUser } from '../dto/me/currentUser.dto';
+import { t } from 'i18next';
+import funFacts from '../FunFacts';
 
 const HomePage: React.FC = () => {
   const location = useLocation();
-  const [user, setUser] = useState<CurrentUser | null>(null);
-  const apiClient = useApi();
-
-  useEffect(() => {
-    if (!apiClient) return;
-
-    const fetchCurrentUser = async () => {
-      const response = await apiClient.getMe();
-      if (response.success) {
-        console.log('Current user data:', response.data);
-        setUser(response.data);
-      } else {
-        console.error(
-          'Failed to fetch current user data:',
-          response.statusCode
-        );
-      }
-    };
-
-    fetchCurrentUser();
-  }, [apiClient]);
+  const user = useUser();
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div className="centered">
+        <h4>{t('loading')}</h4>
+      </div>
+    );
   }
+
   const renderHomeContent = () => {
     if (location.pathname === '/home') {
+      const lang = localStorage.getItem('i18nextLng') || 'en';
+
+      const randomFact =
+        funFacts[lang][Math.floor(Math.random() * funFacts[lang].length)];
+
       return (
         <>
-          <Typography variant="body1" gutterBottom>
-            Welcome,{user.username}
+          <Typography variant="h4" gutterBottom>
+            {t('welcome')}, {user.username}
           </Typography>
-          <Typography variant="body1" gutterBottom>
-            Go back to exploring using these buttons:
+          <Typography variant="h5" gutterBottom>
+            {t('Go back to exploring using these buttons:')}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Button
               variant="contained"
               component={Link}
               to="loans"
-              sx={{ m: 1 }}
+              sx={{
+                m: 1,
+                backgroundColor: '#A0451A',
+                border: '3px solid',
+                borderColor: '#87331B',
+                '&:hover': {
+                  backgroundColor: '#87331B',
+                  borderColor: '#7B2A1B',
+                },
+                fontSize: '1.25rem',
+              }}
             >
-              My Books
+              {t('loans')}
             </Button>
             <Button
               variant="contained"
               component={Link}
               to="books"
-              sx={{ m: 1 }}
+              sx={{
+                m: 1,
+                backgroundColor: '#A0451A',
+                border: '3px solid',
+                borderColor: '#87331B',
+                '&:hover': {
+                  backgroundColor: '#87331B',
+                  borderColor: '#7B2A1B',
+                },
+                fontSize: '1.25rem',
+              }}
             >
-              All Books
+              {t('allbooks')}
             </Button>
           </Box>
-          <Typography variant="body1" gutterBottom>
-            Fun Fact!
+          <Typography variant="h5" gutterBottom sx={{ marginTop: 3 }}>
+            {t('Fun Fact!')}
           </Typography>
-          <Typography variant="body2" gutterBottom>
-            According to the International Federation of Library Associations
-            and Institutions, there are around 2.8 million libraries worldwide.
+          <Typography variant="h6" gutterBottom sx={{ marginTop: 2 }}>
+            {randomFact}
           </Typography>
         </>
       );
