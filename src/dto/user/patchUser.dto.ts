@@ -1,6 +1,5 @@
-export class PatchUserDto {
-  username: string | undefined;
-  name: string | undefined;
-  lastName: string | undefined;
-  email: string | undefined;
+export interface PatchUserDto {
+  email?: string;
+  name?: string;
+  lastName?: string;
 }

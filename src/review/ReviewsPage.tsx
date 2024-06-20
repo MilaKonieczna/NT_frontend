@@ -85,7 +85,7 @@ const ReviewsPage: React.FC = () => {
   return (
     <Box>
       <TextField
-        label="Search"
+        label={t('search')}
         variant="outlined"
         size="small"
         sx={{

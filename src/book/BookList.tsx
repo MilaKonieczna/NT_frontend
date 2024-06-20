@@ -101,34 +101,19 @@ const BookList: React.FC = () => {
 
   return (
     <div className="book-list-container" style={{ marginTop: '20px' }}>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} marginLeft={4}>
         {Array.isArray(books) && books.length > 0 ? (
           books.map((book) => (
-            <Grid
-              item
-              xs={12}
-              sm="auto"
-              md="auto"
-              lg={2.4}
-              key={book.id}
-              style={{ marginBottom: '20px' }}
-            >
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  margin: 'auto',
-                  marginLeft: 2,
-                  marginBottom: 2,
-                  marginRight: 2,
-                  backgroundColor: '#F1EEE5',
-                  border: '3px solid',
-                  borderColor: '#F0EBDE',
-                  position: 'relative',
-                }}
-                onClick={() => handleBookClick(book.id)}
-              >
+            <Grid item xs={12} sm={5} md={2.4} key={book.id}>
+              <Card sx={{ marginBottom: 2, width: 240, position: 'relative' }}>
+                <CardMedia
+                  component="img"
+                  image={book.detail?.cover || ''}
+                  alt={book.title}
+                  className="book-cover"
+                  onClick={() => handleBookClick(book.id)}
+                  sx={{ cursor: 'pointer' }}
+                />
                 {currentUser?.role === 'ROLE_ADMIN' && (
                   <Button
                     onClick={(e) => {
@@ -138,29 +123,16 @@ const BookList: React.FC = () => {
                     startIcon={<DeleteIcon />}
                     sx={{
                       position: 'absolute',
-                      top: 210,
-                      right: 5,
+                      top: 360,
+                      right: 0,
                       color: '#000000',
                     }}
                     variant="text"
                   />
                 )}
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={book.detail?.cover}
-                  alt={book.title}
-                />
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography
-                    gutterBottom
-                    variant="h6"
-                    component="div"
-                    sx={{ lineHeight: '1' }}
-                  >
-                    {book.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
+                <CardContent>
+                  <Typography variant="body2">{book.title}</Typography>
+                  <Typography variant="caption" color="text.secondary">
                     {book.author}
                   </Typography>
                 </CardContent>

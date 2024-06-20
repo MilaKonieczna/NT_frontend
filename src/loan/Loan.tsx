@@ -7,6 +7,7 @@ import {
   Typography,
   Button,
   Pagination,
+  Box,
 } from '@mui/material';
 import { useApi } from '../ApiProvider';
 import { GetUserDto } from '../dto/user/getUser.dto';
@@ -121,71 +122,82 @@ const LoanList: React.FC = () => {
         {Array.isArray(loans) && loans.length > 0 ? (
           loans.map((loan) => (
             <Grid item key={loan.id} xs={12} sm={6} md={4} lg={3}>
-              <Card>
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={loan.bookId?.detail?.cover}
-                  alt={loan.bookId?.title}
-                  className="loan-cover-image"
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h6" component="div">
-                    {loan.bookId?.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Loan Date: {loan.loanDate?.toString()}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Due Date: {loan.dueDate?.toString()}
-                  </Typography>
-                </CardContent>
-                {currentUser?.role === 'ROLE_ADMIN' && (
-                  <div
-                    className="button-container"
-                    style={{ textAlign: 'center' }}
-                  >
-                    <Button
-                      onClick={() => handleReturnLoan(loan.id || 0)}
-                      variant="contained"
-                      sx={{
-                        marginBottom: 2,
-                        width: 100,
-                        alignSelf: 'center',
-                        backgroundColor: '#D3990F',
-                        border: '3px solid',
-                        borderColor: '#C98116',
-                        '&:hover': {
-                          backgroundColor: '#C98116',
-                          border: '3px solid',
-                          borderColor: '#C26C13',
-                        },
+              <Box
+                onClick={() => handleReturnLoan(loan.id || 0)}
+                sx={{ cursor: 'pointer', maxWidth: 345, margin: 'auto' }}
+              >
+                <Card sx={{ maxWidth: 345 }}>
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={loan.bookId?.detail?.cover}
+                    alt={loan.bookId?.title}
+                    className="loan-cover-image"
+                  />
+                  <CardContent>
+                    <Typography gutterBottom variant="h6" component="div">
+                      {loan.bookId?.title}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Loan Date: {loan.loanDate?.toString()}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Due Date: {loan.dueDate?.toString()}
+                    </Typography>
+                  </CardContent>
+                  {currentUser?.role === 'ROLE_ADMIN' && (
+                    <div
+                      className="button-container"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '10px 64px',
                       }}
                     >
-                      {t('return')}
-                    </Button>
-                    <br />
-                    <Button
-                      onClick={() => handleDeleteLoan(loan.id || 0)}
-                      variant="contained"
-                      sx={{
-                        marginBottom: 2,
-                        width: 100,
-                        backgroundColor: '#D3990F',
-                        border: '3px solid',
-                        borderColor: '#C98116',
-                        '&:hover': {
-                          backgroundColor: '#C98116',
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReturnLoan(loan.id || 0);
+                        }}
+                        variant="contained"
+                        sx={{
+                          width: '100px',
+                          backgroundColor: '#87331B',
                           border: '3px solid',
-                          borderColor: '#C26C13',
-                        },
-                      }}
-                    >
-                      {t('delete')}
-                    </Button>
-                  </div>
-                )}
-              </Card>
+                          borderColor: '#7B2A1B',
+                          '&:hover': {
+                            backgroundColor: '#7B2A1B',
+                            border: '3px solid',
+                            borderColor: '#6E211B',
+                          },
+                        }}
+                      >
+                        {t('return')}
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteLoan(loan.id || 0);
+                        }}
+                        variant="contained"
+                        sx={{
+                          width: '100px',
+                          backgroundColor: '#87331B',
+                          border: '3px solid',
+                          borderColor: '#7B2A1B',
+                          '&:hover': {
+                            backgroundColor: '#7B2A1B',
+                            border: '3px solid',
+                            borderColor: '#6E211B',
+                          },
+                        }}
+                      >
+                        {t('delete')}
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              </Box>
             </Grid>
           ))
         ) : (

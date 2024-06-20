@@ -27,8 +27,8 @@ import * as yup from 'yup';
 import { SignupRequestDto } from '../dto/register/signupRequest.dto';
 import { useTranslation } from 'react-i18next';
 import { GetUserDto } from '../dto/user/getUser.dto';
-import { PatchUserDto } from '../dto/user/patchUser.dto';
 import { Formik } from 'formik';
+import { PatchUserDto } from '../dto/user/patchUser.dto';
 
 const UsersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<GetUserDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [user, setUser] = useState<GetUserDto>({
+  const [currentUser, setCurrentUser] = useState<GetUserDto>({
     id: 0,
     username: '',
     name: '',
@@ -44,18 +44,14 @@ const UsersPage: React.FC = () => {
     email: '',
     role: '',
   });
+  const [editUser, setEditUser] = useState<GetUserDto | null>(null);
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
-  const [currentUser, setCurrentUser] = useState<GetUserDto | null>(null);
-  const [editUserForm, setEditUserForm] = useState<PatchUserDto>({
-    username: '',
-    name: '',
-    lastName: '',
-    email: '',
-  });
   const [openAddUserDialog, setOpenAddUserDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const [refreshPage, setRefreshPage] = useState(false);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -63,7 +59,7 @@ const UsersPage: React.FC = () => {
       try {
         const response = await apiClient.getMe();
         if (response.success) {
-          setUser((response.data || {}) as GetUserDto);
+          setCurrentUser((response.data || {}) as GetUserDto);
         } else {
           throw new Error('Failed to fetch current user data');
         }
@@ -77,7 +73,7 @@ const UsersPage: React.FC = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!apiClient || !user) return;
+      if (!apiClient || !currentUser) return;
       try {
         const response = await apiClient.getUsers();
         if (response.data && response.data.users) {
@@ -94,38 +90,35 @@ const UsersPage: React.FC = () => {
     };
 
     fetchUsers();
-  }, [user, apiClient]);
+  }, [currentUser, apiClient, refreshPage]);
 
-  const handleEditUser = async () => {
-    if (!currentUser || !apiClient) return;
+  const handleEditUser = useCallback(
+    (
+      values: { id: number; name: string; lastName: string; email: string },
+      formik: any
+    ) => {
+      if (!apiClient) return;
 
-    const validEditUserForm: PatchUserDto = {
-      username: editUserForm.username || '',
-      name: editUserForm.name || '',
-      lastName: editUserForm.lastName || '',
-      email: editUserForm.email || '',
-    };
+      const { id, ...data } = values;
 
-    try {
-      console.log('Editing user with data:', validEditUserForm);
-      const response = await apiClient.patchUser(
-        currentUser.id,
-        validEditUserForm
-      );
-      if (response.success && response.data) {
-        setUsers(
-          users.map((user) =>
-            user.id === currentUser.id ? response.data : user
-          )
-        );
-        setOpenEditUserDialog(false);
-      } else {
-        throw new Error('Failed to edit user');
-      }
-    } catch (error) {
-      console.error('Failed to edit user:', error);
-    }
-  };
+      const patchData: PatchUserDto = {
+        email: data.email,
+        name: data.name,
+        lastName: data.lastName,
+      };
+
+      apiClient.patchUser(id, patchData).then((response) => {
+        if (response.success) {
+          formik.resetForm();
+          setOpenEditUserDialog(false);
+          setRefreshPage(true);
+        } else {
+          formik.setFieldError('id', 'Failed to update details');
+        }
+      });
+    },
+    [apiClient]
+  );
 
   const handleDeleteUser = async (id: number) => {
     if (!apiClient) return;
@@ -139,14 +132,13 @@ const UsersPage: React.FC = () => {
   };
 
   const handleOpenEditUserDialog = (user: GetUserDto) => {
-    setCurrentUser(user);
-    setEditUserForm({
-      username: user.username,
-      name: user.name,
-      lastName: user.lastName,
-      email: user.email,
-    });
+    setEditUser(user);
     setOpenEditUserDialog(true);
+  };
+
+  const handleCloseEditUserDialog = () => {
+    setOpenEditUserDialog(false);
+    setEditUser(null);
   };
 
   const handleOpenAddUserDialog = () => {
@@ -155,13 +147,6 @@ const UsersPage: React.FC = () => {
 
   const handleCloseAddUserDialog = () => {
     setOpenAddUserDialog(false);
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    key: keyof PatchUserDto
-  ) => {
-    setEditUserForm({ ...editUserForm, [key]: e.target.value });
   };
 
   const handleAddUser = useCallback(
@@ -174,6 +159,7 @@ const UsersPage: React.FC = () => {
           setSuccessMessage('User added successfully.');
           formik.resetForm();
           setOpenAddUserDialog(false);
+          setRefreshPage(true);
         } else {
           setErrorMessage('Failed to add user. Please try again.');
           console.error('Failed to add user. Response:', response);
@@ -200,10 +186,6 @@ const UsersPage: React.FC = () => {
     []
   );
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
   const filteredUsers = users.filter(
     (user) =>
       (user.username &&
@@ -225,47 +207,64 @@ const UsersPage: React.FC = () => {
     return <Typography color="error">{(error as Error).message}</Typography>;
   }
 
-  if (!user || user.role !== 'ROLE_ADMIN') {
+  if (!currentUser || currentUser.role !== 'ROLE_ADMIN') {
     return (
       <Box>
-        <Typography>
-          {t('You do not have permission to view this page')}
-        </Typography>
+        <Typography>{t('NoPremission')}</Typography>
       </Box>
     );
   }
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <TextField
-          label="Search"
-          variant="outlined"
-          size="small"
-          sx={{ width: 400 }}
+          type="text"
+          placeholder={t('search')}
           value={searchTerm}
-          onChange={handleSearch}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant="outlined"
+          sx={{ width: 400, marginRight: 80, marginBottom: 2 }}
         />
         <Button
           variant="contained"
+          color="primary"
           startIcon={<AddIcon />}
           onClick={handleOpenAddUserDialog}
           sx={{
-            backgroundColor: '#6e211b',
-            color: '#f1f0eb',
+            marginRight: 2,
+            color: '#F1F0EB',
+            backgroundColor: '#AAA45A',
+            border: '3px solid',
+            borderColor: '#7E7940',
             '&:hover': {
-              backgroundColor: '#531a15',
+              backgroundColor: '#7E7940',
+              border: '3px solid',
+              borderColor: '#524D25',
             },
           }}
         >
-          {t('Add User')}
+          {t('addUser')}
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<EditIcon />}
+          onClick={() => handleOpenEditUserDialog(editUser as GetUserDto)}
+          sx={{
+            marginRight: 2,
+            color: '#F1F0EB',
+            backgroundColor: '#AAA45A',
+            border: '3px solid',
+            borderColor: '#7E7940',
+            '&:hover': {
+              backgroundColor: '#7E7940',
+              border: '3px solid',
+              borderColor: '#524D25',
+            },
+          }}
+        >
+          {t('editUser')}
         </Button>
       </Box>
       <TableContainer
@@ -275,14 +274,13 @@ const UsersPage: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>{t('ID')}</TableCell>
-              <TableCell>{t('Username')}</TableCell>
-              <TableCell>{t('Name')}</TableCell>
-              <TableCell>{t('Last Name')}</TableCell>
-              <TableCell>{t('Email')}</TableCell>
-              <TableCell>{t('Role')}</TableCell>
-              <TableCell>{t('Edit')}</TableCell>
-              <TableCell>{t('Delete')}</TableCell>
+              <TableCell>{t('id')}</TableCell>
+              <TableCell>{t('username')}</TableCell>
+              <TableCell>{t('name')}</TableCell>
+              <TableCell>{t('lastname')}</TableCell>
+              <TableCell>{t('email')}</TableCell>
+              <TableCell>{t('role')}</TableCell>
+              <TableCell>{t('delete')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -295,11 +293,6 @@ const UsersPage: React.FC = () => {
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleOpenEditUserDialog(user)}>
-                    <EditIcon />
-                  </IconButton>
-                </TableCell>
-                <TableCell>
                   <IconButton onClick={() => handleDeleteUser(user.id)}>
                     <DeleteIcon />
                   </IconButton>
@@ -310,45 +303,89 @@ const UsersPage: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <Dialog
-        open={openEditUserDialog}
-        onClose={() => setOpenEditUserDialog(false)}
-      >
+      <Dialog open={openEditUserDialog} onClose={handleCloseEditUserDialog}>
         <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
-          <TextField
-            sx={{ marginTop: 4, marginBottom: 2 }}
-            label="Username"
-            value={editUserForm.username}
-            onChange={(e) => handleInputChange(e, 'username')}
-            fullWidth
-          />
-          <TextField
-            sx={{ marginBottom: 2 }}
-            label="Name"
-            value={editUserForm.name}
-            onChange={(e) => handleInputChange(e, 'name')}
-            fullWidth
-          />
-          <TextField
-            sx={{ marginBottom: 2 }}
-            label="Last Name"
-            value={editUserForm.lastName}
-            onChange={(e) => handleInputChange(e, 'lastName')}
-            fullWidth
-          />
-          <TextField
-            sx={{ marginBottom: 2 }}
-            label="Email"
-            value={editUserForm.email}
-            onChange={(e) => handleInputChange(e, 'email')}
-            fullWidth
-          />
+          <Formik
+            initialValues={{
+              id: editUser?.id || 0,
+              name: editUser?.name || '',
+              lastName: editUser?.lastName || '',
+              email: editUser?.email || '',
+            }}
+            onSubmit={handleEditUser}
+            validateOnChange
+            validateOnBlur
+          >
+            {(formik) => (
+              <form onSubmit={formik.handleSubmit} noValidate>
+                <TextField
+                  id="id"
+                  name="id"
+                  label={t('id')}
+                  variant="outlined"
+                  fullWidth
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.id}
+                  error={formik.touched.id && !!formik.errors.id}
+                  helperText={formik.touched.id && formik.errors.id}
+                  sx={{ marginBottom: 2, marginTop: 2 }}
+                />
+                <TextField
+                  id="name"
+                  name="name"
+                  label={t('name')}
+                  variant="outlined"
+                  fullWidth
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.name}
+                  error={formik.touched.name && !!formik.errors.name}
+                  helperText={formik.touched.name && formik.errors.name}
+                  sx={{ marginBottom: 2 }}
+                />
+                <TextField
+                  id="lastName"
+                  name="lastName"
+                  label={t('lastname')}
+                  variant="outlined"
+                  fullWidth
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.lastName}
+                  error={formik.touched.lastName && !!formik.errors.lastName}
+                  helperText={formik.touched.lastName && formik.errors.lastName}
+                  sx={{ marginBottom: 2 }}
+                />
+                <TextField
+                  id="email"
+                  name="email"
+                  label={t('email')}
+                  variant="outlined"
+                  fullWidth
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.email}
+                  error={formik.touched.email && !!formik.errors.email}
+                  helperText={formik.touched.email && formik.errors.email}
+                  sx={{ marginBottom: 2 }}
+                />
+                <DialogActions>
+                  <Button onClick={handleCloseEditUserDialog}>
+                    {t('cancel')}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!formik.isValid || !formik.dirty}
+                  >
+                    {t('save')}
+                  </Button>
+                </DialogActions>
+              </form>
+            )}
+          </Formik>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleEditUser}>Save</Button>
-          <Button onClick={() => setOpenEditUserDialog(false)}>Cancel</Button>
-        </DialogActions>
       </Dialog>
 
       <Dialog open={openAddUserDialog} onClose={handleCloseAddUserDialog}>
@@ -359,7 +396,7 @@ const UsersPage: React.FC = () => {
               username: '',
               email: '',
               password: '',
-              role: 'USER',
+              role: 'ROLE_READER',
             }}
             onSubmit={handleAddUser}
             validationSchema={validationSchema}
@@ -372,7 +409,7 @@ const UsersPage: React.FC = () => {
                   <TextField
                     id="username"
                     name="username"
-                    label="Username"
+                    label={t('username')}
                     variant="outlined"
                     fullWidth
                     onChange={formik.handleChange}
@@ -387,7 +424,7 @@ const UsersPage: React.FC = () => {
                   <TextField
                     id="email"
                     name="email"
-                    label="Email"
+                    label={t('email')}
                     variant="outlined"
                     fullWidth
                     onChange={formik.handleChange}
@@ -400,7 +437,7 @@ const UsersPage: React.FC = () => {
                   <TextField
                     id="password"
                     name="password"
-                    label="Password"
+                    label={t('password')}
                     variant="outlined"
                     type="password"
                     fullWidth
@@ -417,7 +454,7 @@ const UsersPage: React.FC = () => {
                     id="role"
                     name="role"
                     select
-                    label="Role"
+                    label={t('role')}
                     variant="outlined"
                     fullWidth
                     onChange={formik.handleChange}
@@ -427,18 +464,10 @@ const UsersPage: React.FC = () => {
                     helperText={formik.touched.role && formik.errors.role}
                     sx={{ marginBottom: 2 }}
                   >
-                    <MenuItem value="USER">User</MenuItem>
-                    <MenuItem value="ADMIN">Admin</MenuItem>
+                    <MenuItem value="ROLE_READER">Reader</MenuItem>
+                    <MenuItem value="ROLE_ADMIN">Admin</MenuItem>
                   </TextField>
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    fullWidth
-                    color="primary"
-                    disabled={!formik.isValid || !formik.dirty}
-                  >
-                    Add User
-                  </Button>
+
                   {successMessage && (
                     <Typography variant="body1" color="primary" align="center">
                       {successMessage}
@@ -450,13 +479,19 @@ const UsersPage: React.FC = () => {
                     </Typography>
                   )}
                 </div>
+                <DialogActions>
+                  <Button onClick={handleCloseAddUserDialog}>Cancel</Button>
+                  <Button
+                    type="submit"
+                    disabled={!formik.isValid || !formik.dirty}
+                  >
+                    Save
+                  </Button>
+                </DialogActions>
               </form>
             )}
           </Formik>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAddUserDialog}>Cancel</Button>
-        </DialogActions>
       </Dialog>
     </Box>
   );

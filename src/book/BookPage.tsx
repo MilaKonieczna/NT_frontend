@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Grid,
   Card,
@@ -16,7 +16,7 @@ import {
   TextField,
 } from '@mui/material';
 import './BookPage.css';
-import { useApi } from '../ApiProvider';
+import { useApi, useUser } from '../ApiProvider';
 import { GetReviewDto } from '../dto/review/getReview.dto';
 import { GetBookDto } from '../dto/book/getBook.dto';
 import { GetBooksPageResponseDto } from '../dto/book/getBookPageResponse.dto';
@@ -26,6 +26,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import { useTranslation } from 'react-i18next';
 import { GetUserDto } from '../dto/user/getUser.dto';
 import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
+import { CreateReviewRequestDto } from '../dto/review/createReviewRequest.dto';
 
 const StarRating: React.FC<{
   rating: number;
@@ -56,11 +57,13 @@ const BookPage: React.FC = () => {
   const [reviews, setReviews] = useState<GetReviewDto[]>([]);
   const [relatedBooks, setRelatedBooks] =
     useState<GetBooksPageResponseDto | null>(null);
+  const user = useUser();
   const apiClient = useApi();
   const { t } = useTranslation();
   const [, setUser] = useState<GetUserDto | null>(null);
   const [open, setOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 0, comment: '' });
+  const navigate = useNavigate();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -70,9 +73,32 @@ const BookPage: React.FC = () => {
     setOpen(false);
   };
 
-  const handleSaveReview = async () => {
-    // Implement review saving logic here
-    handleClose();
+  const handleSaveReview = async (rating: number, comment: string) => {
+    try {
+      if (!user || !book?.id || !apiClient) {
+        console.error('User, book, or API client not found');
+        return;
+      }
+
+      const reviewData: CreateReviewRequestDto = {
+        rating: rating,
+        comment: comment,
+        userId: user.id,
+        bookId: book.id,
+      };
+
+      const response = await apiClient.createReview(reviewData);
+
+      if (response.success && response.data) {
+        console.log('Review created successfully:', response.data);
+      } else {
+        console.error('Failed to save review:', response.status);
+      }
+    } catch (error) {
+      console.error('Error saving review:', error);
+    } finally {
+      handleClose();
+    }
   };
 
   useEffect(() => {
@@ -156,30 +182,35 @@ const BookPage: React.FC = () => {
     }
   }, [apiClient, book]);
 
-  // const handleLoan = useCallback(
-  //   async (bookId: number | undefined) => {
-  //     if (!bookId || !apiClient) return;
+  const handleLoan = useCallback(
+    async (bookId: number | undefined) => {
+      if (!bookId || !apiClient) return;
 
-  //     const loan: CreateLoanRequestDto = {
-  //       userId: bookId,
-  //       bookId,
-  //       loanDate: new Date(),
-  //       dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-  //     };
+      const loan: CreateLoanRequestDto = {
+        userId: user?.id,
+        bookId,
+        loanDate: new Date(),
+        dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+      };
 
-  //     try {
-  //       const response = await apiClient.createLoan(loan);
-  //       if (response.success) {
-  //         console.log('Loan created successfully:', response.data);
-  //       } else {
-  //         console.error('Failed to create loan:', response.status);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error creating loan:', error);
-  //     }
-  //   },
-  //   [apiClient]
-  // );
+      try {
+        const response = await apiClient.createLoan(loan);
+        if (response.success) {
+          console.log('Loan created successfully:', response.data);
+        } else {
+          console.error('Failed to create loan:', response.status);
+        }
+      } catch (error) {
+        console.error('Error creating loan:', error);
+      }
+    },
+    [apiClient, user?.id]
+  );
+  const handleBookClick = (bookId: number | undefined) => {
+    if (bookId !== undefined) {
+      navigate(`/home/books/${bookId}`);
+    }
+  };
   if (!book) return <div>{t('noBookAvailable')}</div>;
 
   const averageRating = reviews.length
@@ -238,6 +269,7 @@ const BookPage: React.FC = () => {
                 >
                   <Button
                     variant="outlined"
+                    onClick={() => handleLoan(book.id)}
                     sx={{
                       height: '35px',
                       width: '150px',
@@ -338,7 +370,7 @@ const BookPage: React.FC = () => {
               variant="h5"
               sx={{ marginBottom: 2, marginRight: '16px' }}
             >
-              {t('relatedBooks')}
+              {t('inThisGenre')}
             </Typography>
             <Grid container spacing={1}>
               {relatedBooks.books
@@ -353,6 +385,7 @@ const BookPage: React.FC = () => {
                         image={relatedBook.detail?.cover || ''}
                         alt={relatedBook.title}
                         className="book-cover"
+                        onClick={() => handleBookClick(relatedBook.id)}
                       />
                       <CardContent>
                         <Typography variant="body2">
@@ -396,7 +429,12 @@ const BookPage: React.FC = () => {
           <Button onClick={handleClose} color="primary">
             {t('cancel')}
           </Button>
-          <Button onClick={handleSaveReview} color="primary">
+          <Button
+            onClick={() =>
+              handleSaveReview(newReview.rating, newReview.comment)
+            }
+            color="primary"
+          >
             {t('save')}
           </Button>
         </DialogActions>

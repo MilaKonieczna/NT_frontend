@@ -32,7 +32,7 @@ const HomePage: React.FC = () => {
             {t('welcome')}, {user.username}
           </Typography>
           <Typography variant="h5" gutterBottom>
-            {t('Go back to exploring using these buttons:')}
+            {t('goBack')}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <Button
@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
             </Button>
           </Box>
           <Typography variant="h5" gutterBottom sx={{ marginTop: 3 }}>
-            {t('Fun Fact!')}
+            {t('funFact')}
           </Typography>
           <Typography variant="h6" gutterBottom sx={{ marginTop: 2 }}>
             {randomFact}

@@ -18,6 +18,8 @@ import { GetUsersPageResponseDto } from './dto/user/getUserPageResponse.dto';
 import { GetUserDto } from './dto/user/getUser.dto';
 import { GetBookDto } from './dto/book/getBook.dto';
 import { PatchBookResponseDto } from './dto/book/patchBookResponse.dto';
+import { PatchUserDto } from './dto/user/patchUser.dto';
+import { ReturnLoanResponseDto } from './dto/loan/returnLoanResponse.dto';
 
 export type ClientResponse<T> = {
   success: boolean;
@@ -60,6 +62,7 @@ export class LibraryClient {
       };
     }
   }
+
   public async createReview(
     review: CreateReviewRequestDto
   ): Promise<ClientResponse<CreateReviewResponseDto | null>> {
@@ -80,6 +83,7 @@ export class LibraryClient {
       };
     }
   }
+
   public async getReviews(
     page = 0,
     size = 10
@@ -102,6 +106,7 @@ export class LibraryClient {
       };
     }
   }
+
   public async getReviewsForBook(
     id: number
   ): Promise<ClientResponse<GetReviewsPageResponseDto | null>> {
@@ -143,6 +148,7 @@ export class LibraryClient {
       };
     }
   }
+
   public async getLoans(
     page = 0,
     size = 10
@@ -187,14 +193,15 @@ export class LibraryClient {
     }
   }
 
-  public async returnLoan(id: number): Promise<ClientResponse<null>> {
+  public async returnLoan(
+    id: number
+  ): Promise<ClientResponse<ReturnLoanResponseDto>> {
     try {
-      const response: AxiosResponse<null> = await this.client.patch(
-        `/loans/${id}/return`
-      );
+      const response: AxiosResponse<ReturnLoanResponseDto> =
+        await this.client.patch(`/loans/${id}/return`);
       return {
         success: true,
-        data: null,
+        data: response.data,
         status: response.status,
       };
     } catch (error) {
@@ -319,13 +326,9 @@ export class LibraryClient {
     try {
       const { id, ...rest } = details;
 
-      // Validate DTO properties
       if (!id || !rest.genre || !rest.summary || !rest.cover) {
         throw new Error('Invalid request data: All fields are required');
       }
-
-      // Log request payload for debugging
-      console.log('PATCH Request Payload:', rest);
 
       const response: AxiosResponse<UpdateDetailResponseDto> =
         await this.client.patch(`/books/${id}/details`, rest, {
@@ -342,7 +345,6 @@ export class LibraryClient {
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
 
-      // Log error details for debugging
       console.error('PATCH Request Error:', axiosError.response?.data);
 
       return {
@@ -353,13 +355,25 @@ export class LibraryClient {
     }
   }
 
-  public async updateCopies(
+  public async patchCopies(
     id: number,
-    copies: number
+    newCopies: number
   ): Promise<ClientResponse<PatchBookResponseDto | null>> {
     try {
+      console.log(`Sending PATCH request to /books/${id}/update with data:`, {
+        newCopies,
+      }); // Log the data
+
       const response: AxiosResponse<PatchBookResponseDto> =
-        await this.client.patch(`/books/${id}/update`, { copies });
+        await this.client.patch(
+          `/books/${id}/update`,
+          { newCopies },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
       return {
         success: true,
         data: response.data,
@@ -367,6 +381,10 @@ export class LibraryClient {
       };
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
+
+      // Log error details for debugging
+      console.error('PATCH Request Error:', axiosError.response?.data);
+
       return {
         success: false,
         data: null,
@@ -475,12 +493,21 @@ export class LibraryClient {
     }
   }
 
-  public async patchUser(id: number, data: any): Promise<ClientResponse<any>> {
+  public async patchUser(
+    id: number,
+    data: PatchUserDto
+  ): Promise<ClientResponse<any>> {
     try {
       const response: AxiosResponse<any> = await this.client.patch(
         `/users/${id}`,
-        data
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
+
       return {
         success: true,
         data: response.data,
@@ -489,6 +516,7 @@ export class LibraryClient {
     } catch (error) {
       const axiosError = error as AxiosError<Error>;
       console.error('Error response:', axiosError.response?.data);
+
       return {
         success: false,
         data: null,

@@ -217,21 +217,34 @@ const MenuAppBar: React.FC = () => {
       }),
     []
   );
-  const handleSubmitCopies = useCallback(
-    (values: { newCopies: number; bookId: number }) => {
-      console.log('Submitting copies:', values);
+
+  const onSubmitCopies = useCallback(
+    (
+      values: {
+        bookId: number;
+        newCopies: number;
+      },
+      formik: any
+    ) => {
       if (!apiClient) return;
-      const { newCopies, bookId } = values;
-      apiClient.updateCopies(bookId, newCopies).then((response) => {
-        if (response.success) {
-          console.log('Copies updated successfully:', response.data);
-          setUpdateCopiesOpen(false);
-        } else {
-          console.error('Failed to update copies:', response.status);
-        }
-      });
+
+      console.log('Submitting values:', values);
+
+      apiClient
+        .patchCopies(values.bookId, values.newCopies) // Ensure 'newCopies' is sent
+        .then((response) => {
+          console.log('API Response:', response);
+          if (response.success) {
+            navigate('/home/books');
+            formik.resetForm();
+            setUpdateCopiesOpen(false);
+          } else {
+            // Assuming PatchBookResponseDto contains necessary fields
+            formik.setFieldError('bookId', 'Failed to update copies');
+          }
+        });
     },
-    [apiClient]
+    [apiClient, navigate]
   );
 
   return (
@@ -637,7 +650,7 @@ const MenuAppBar: React.FC = () => {
               bookId: 0,
               newCopies: 0,
             }}
-            onSubmit={handleSubmitCopies}
+            onSubmit={onSubmitCopies}
             validateOnChange
             validateOnBlur
           >
