@@ -24,9 +24,9 @@ import { Formik } from 'formik';
 import eng from '../english.png';
 import it from '../italian.png';
 import pl from '../polish.png';
-import { useApi } from '../ApiProvider';
+import { useApi } from '../api/ApiProvider';
 import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
+import i18n from '../api/i18n';
 import { GetUserDto } from '../dto/user/getUser.dto';
 
 const theme = createTheme({

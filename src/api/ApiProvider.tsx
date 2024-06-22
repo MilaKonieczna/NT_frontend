@@ -1,6 +1,6 @@
-import { GetUserDto } from './dto/user/getUser.dto';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { LibraryClient } from './library-client';
+import { GetUserDto } from '../dto/user/getUser.dto';
 const ApiContext = createContext<LibraryClient | null>(null);
 const UserContext = createContext<GetUserDto | null>(null);
 

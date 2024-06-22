@@ -1,14 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import ApiProvider from './ApiProvider';
 import HomePage from './home/HomePage';
 import LoanList from './loan/Loan';
 import BookList from './book/BookList';
 import LoginForm from './login/LoginForm';
 import { I18nextProvider } from 'react-i18next';
-import i18n from './i18n';
+import i18n from './api/i18n';
 import BookPage from './book/BookPage';
 import UsersPage from './user/UsersPage';
 import ReviewsPage from './review/ReviewsPage';
+import ApiProvider from './api/ApiProvider';
 
 function App() {
   return (

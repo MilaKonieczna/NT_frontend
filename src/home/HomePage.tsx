@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { useUser } from '../ApiProvider';
 import MenuAppBar from '../menu/MenuAppBar';
 import './HomePage.css';
 import { t } from 'i18next';
-import funFacts from '../FunFacts';
+import funFacts from './FunFacts';
+import { useUser } from '../api/ApiProvider';
 
 const HomePage: React.FC = () => {
   const location = useLocation();

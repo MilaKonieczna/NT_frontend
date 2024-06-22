@@ -14,7 +14,7 @@ import {
   TextField,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useApi } from '../ApiProvider';
+import { useApi } from '../api/ApiProvider';
 import { GetReviewDto } from '../dto/review/getReview.dto';
 import { useTranslation } from 'react-i18next';
 

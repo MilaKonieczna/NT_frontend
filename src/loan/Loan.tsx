@@ -9,7 +9,7 @@ import {
   Pagination,
   Box,
 } from '@mui/material';
-import { useApi } from '../ApiProvider';
+import { useApi } from '../api/ApiProvider';
 import { GetUserDto } from '../dto/user/getUser.dto';
 import { useTranslation } from 'react-i18next';
 import { GetLoanDto } from '../dto/loan/getLoan.dto';

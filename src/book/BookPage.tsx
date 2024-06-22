@@ -16,7 +16,6 @@ import {
   TextField,
 } from '@mui/material';
 import './BookPage.css';
-import { useApi, useUser } from '../ApiProvider';
 import { GetReviewDto } from '../dto/review/getReview.dto';
 import { GetBookDto } from '../dto/book/getBook.dto';
 import { GetBooksPageResponseDto } from '../dto/book/getBookPageResponse.dto';
@@ -27,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { GetUserDto } from '../dto/user/getUser.dto';
 import { CreateLoanRequestDto } from '../dto/loan/createLoanRequest.dto';
 import { CreateReviewRequestDto } from '../dto/review/createReviewRequest.dto';
+import { useApi, useUser } from '../api/ApiProvider';
 
 const StarRating: React.FC<{
   rating: number;

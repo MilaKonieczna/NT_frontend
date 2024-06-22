@@ -22,7 +22,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { useApi } from '../ApiProvider';
+import { useApi } from '../api/ApiProvider';
 import * as yup from 'yup';
 import { SignupRequestDto } from '../dto/register/signupRequest.dto';
 import { useTranslation } from 'react-i18next';
